@@ -1,0 +1,1393 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Collections;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Text;
+using System.Threading;
+using System.IO;
+using System.Resources;
+using System.Xml;
+
+namespace DQBasePage
+{
+    #region Delegate.
+    public delegate void DQ_PrePostHandler();
+    #endregion
+
+    public partial class DQBasePage : System.Web.UI.Page
+    {
+
+        #region Enumeration.
+        public enum Enum_PAGE_ACTION
+        {
+            EDIT,
+            VIEW,
+            ADD,
+            PRINT,
+            SEARCH
+        };
+        public enum Enum_BIND_LEVEL
+        {
+            ALL,
+            FIELDS,
+            SECTIONS,
+            NONE
+            //TABLES,
+            //TABLES_AND_FIELDS,
+        };
+
+
+        #endregion
+        #region Members
+        private DataSet m_GlobalDS;
+        private DataSet m_ExtraFieldsDS;
+        private DataSet m_ParametersDS;
+        private Enum_PAGE_ACTION m_PageAction;
+        private Enum_BIND_LEVEL m_BindLevel;
+        private List<Control> m_ControlsToBind;
+        private List<String> m_TablesToBind;
+        private List<String> m_SectionsToBind;
+        private string m_MasterPage;
+        private DQLogger.DQLogger m_DQLogger;
+        private string m_DQAppRoot;
+        #endregion
+        #region Properties
+        public DataSet DQ_GlobalDS
+        {
+            get { return m_GlobalDS; }
+            set { m_GlobalDS = value; }
+        }
+        public Enum_PAGE_ACTION DQ_PageAction
+        {
+            get { return m_PageAction; }
+            set { m_PageAction = value; }
+        }
+        public Enum_BIND_LEVEL DQ_BindLevel
+        {
+            get { return m_BindLevel; }
+            set { m_BindLevel = value; }
+        }
+        public List<Control> DQ_ControlsToBind
+        {
+            get { return m_ControlsToBind; }
+            set { m_ControlsToBind = value; }
+        }
+        public List<String> DQ_TablesToBind
+        {
+            get { return m_TablesToBind; }
+            set { m_TablesToBind = value; }
+        }
+        public List<String> DQ_SectionsToBind
+        {
+            get { return m_SectionsToBind; }
+            set { m_SectionsToBind = value; }
+        }
+        public string DQ_MasterPage
+        {
+            get { return m_MasterPage; }
+            set { m_MasterPage = value; }
+        }
+        public DQLogger.DQLogger DQ_Logger
+        {
+            get
+            {
+                return m_DQLogger;
+            }
+            set
+            {
+                m_DQLogger = value;
+            }
+        }
+        public string DQ_AppRoot
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(m_DQAppRoot))
+                {
+                    if (System.Configuration.ConfigurationManager.AppSettings["SITE_PATH"] != null)
+                    {
+                        m_DQAppRoot = System.Configuration.ConfigurationManager.AppSettings["SITE_PATH"].ToString();
+                    }                    
+                }
+                return m_DQAppRoot;
+            }
+            set
+            {
+                m_DQAppRoot = value;
+            }
+        }
+        #endregion
+        #region Events
+        public event DQ_PrePostHandler DQ_PreScreen2DS;
+        public event DQ_PrePostHandler DQ_PostScreen2DS;
+        public event DQ_PrePostHandler DQ_PreManageExtraFields;
+        public event DQ_PrePostHandler DQ_PostManageExtraFields;
+        public event DQ_PrePostHandler DQ_PreManageParameters;
+        public event DQ_PrePostHandler DQ_PostManageParameters;
+        public event DQ_PrePostHandler DQ_PreRunProgram;
+        public event DQ_PrePostHandler DQ_PostRunProgram;
+        public event DQ_PrePostHandler DQ_PreDS2ScreenProgram;
+        public event DQ_PrePostHandler DQ_PostDS2ScreenProgram;
+        #endregion
+        #region Constructor
+        public DQBasePage()
+        {
+            #region Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            this.DQ_GlobalDS = new DataSet();
+            this.m_ExtraFieldsDS = new DataSet();
+            this.m_ParametersDS = new DataSet();
+            this.DQ_ControlsToBind = new List<Control>();
+            this.DQ_BindLevel = Enum_BIND_LEVEL.ALL;
+            this.DQ_TablesToBind = new List<string>();
+            this.DQ_SectionsToBind = new List<string>();
+            this.DQ_Logger = new DQLogger.DQLogger();
+            this.DQ_AppRoot = string.Empty;
+            #endregion
+            #region Creating ExtraFields DataTable.
+            oScreenBinder.DQ_CreateDTExtraFields(this.m_ExtraFieldsDS);
+            #endregion
+            #region Adding Parameters Table.
+            oScreenBinder.DQ_CreateDTParameters(this.m_ParametersDS);
+            oScreenBinder.DQ_AddParametersFromConfig(this.m_ParametersDS);
+            #endregion
+            #region Adding the Errors DataTable
+            oScreenBinder.DQ_AddDTErrors(this.DQ_GlobalDS);
+            #endregion
+            #region Set Default Theme.
+            DQ_SetDefaultTheme();
+            #endregion
+        }
+        #endregion
+        #region DoOperation
+        public void DQ_DoOperation()
+        {
+            try
+            {
+                #region Declaration And Initialization Section.
+                DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+                DQServiceLayer.cServiceLayer oServiceLayer = new DQServiceLayer.cServiceLayer();
+                List<string> i_BuiltInDTs = new List<string>();
+                #endregion
+                #region DQ_ResetGlobalDS.
+                DQ_ResetGlobalDS(ref m_GlobalDS);
+                #endregion
+                #region DQ_PrepareControlsToBind.
+                oScreenBinder.DQ_ControlsToBind = DQ_PrepareControlsToBind();
+                #endregion
+                #region Screen2DS
+                #region PreScreen2DS.
+                if (DQ_PreScreen2DS != null)
+                {
+                    DQ_PreScreen2DS();
+                    DQ_HandleEvent(ref DQ_PreScreen2DS);
+                }
+                #endregion
+                #region Actual Screen2DS
+                oScreenBinder.DQ_Screen2DS(this.Page, m_GlobalDS);
+                #endregion
+                #region PostScreen2DS
+                if (DQ_PostScreen2DS != null)
+                {
+                    DQ_PostScreen2DS();
+                    DQ_HandleEvent(ref DQ_PostScreen2DS);
+                }
+                #endregion
+                #endregion
+                #region ManageExtraFields.
+                #region PreManageExtraFields
+                if (DQ_PreManageExtraFields != null)
+                {
+                    DQ_PreManageExtraFields();
+                    DQ_HandleEvent(ref DQ_PreManageExtraFields);
+                }
+                #endregion
+                #region Actual ManageExtraFields
+                oScreenBinder.DQ_MergeExtraFields(m_GlobalDS, this.m_ExtraFieldsDS, true);
+                #endregion
+                #region PostManageExtraFields
+                if (DQ_PostManageExtraFields != null)
+                {
+                    DQ_PostManageExtraFields();
+                    DQ_HandleEvent(ref DQ_PostManageExtraFields);
+                }
+                #endregion
+                #endregion
+                #region ManageParameters.
+                #region DQ_AddRequiredParameters
+                DQ_AddRequiredParameters();
+                #endregion
+                #region PreManageParameters
+                if (DQ_PreManageParameters != null)
+                {
+                    DQ_PreManageParameters();
+                    DQ_HandleEvent(ref DQ_PreManageParameters);
+                }
+                #endregion
+                #region Actual Manage Parameters.
+                oScreenBinder.DQ_AddDTParameters(m_GlobalDS, this.m_ParametersDS);
+                #endregion
+                #region PostManageParameters.
+                if (DQ_PostManageParameters != null)
+                {
+                    DQ_PostManageParameters();
+                    DQ_HandleEvent(ref DQ_PostManageParameters);
+                }
+                #endregion
+                #endregion
+                #region RunProgram.
+                #region PreRunProgram.
+                if (DQ_PreRunProgram != null)
+                {
+                    DQ_PreRunProgram();
+                    DQ_HandleEvent(ref DQ_PreRunProgram);
+                }
+                #endregion
+                #region Actual RunProgram.
+                oServiceLayer.RunProgram(ref m_GlobalDS);
+                #endregion
+                #region PostRunProgram.
+                if (DQ_PostRunProgram != null)
+                {
+                    DQ_PostRunProgram();
+                    DQ_HandleEvent(ref DQ_PostRunProgram);
+                }
+                #endregion
+                #region DQ_HandleDTErrors
+                DQ_HandleDTErrors();
+                #endregion
+                #endregion
+                #region DS2Screen.
+                //#region PreDS2Screen
+                //if (DQ_PreDS2ScreenProgram != null) 
+                //{ 
+                //    DQ_PreDS2ScreenProgram();
+                //    DQ_HandleEvent(ref DQ_PreDS2ScreenProgram);
+                //}
+                //#endregion
+                //#region  DS2Screen.
+                //oScreenBinder.DQ_DS2Screen(this.Page, m_GlobalDS);
+                //#endregion
+                //#region PostDS2Screen.
+                //if (DQ_PostDS2ScreenProgram != null) 
+                //{ 
+                //    DQ_PostDS2ScreenProgram();
+                //    DQ_HandleEvent(ref DQ_PostDS2ScreenProgram);
+                //}
+                //#endregion
+                #endregion
+            }
+            catch (System.Exception ex)
+            {
+                //ex.Data.Add("CM_DoOperation", "This is a custom error propagated through the exception object");
+                throw;
+            }
+        }
+        #endregion
+        #region DQ_BindScreenFromDS
+        public void DQ_BindDS2Screen()
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+
+            #region Body Section
+            oScreenBinder.DQ_DS2Screen(this.Page, m_GlobalDS);
+            #endregion
+        }
+        #endregion
+        #region DQ_AddParam
+        public void DQ_AddParam(string i_Param_Name, string i_Param_Value)
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+
+            #region Body Section.
+            oScreenBinder.DQ_AddParam(this.m_ParametersDS, i_Param_Name, i_Param_Value);
+            #endregion
+        }
+        #endregion
+        #region DQ_AddExtraTable.
+        private void DQ_AddExtraTable(string i_TableName)
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+            oScreenBinder.DQ_AddExtraTableToGlobalDS(this.DQ_GlobalDS, i_TableName);
+        }
+        #endregion
+        #region DQ_AddExtraFields
+        public void DQ_AddExtraField(string i_TableName, string i_ColumnName, string i_ColumnType, string i_Value)
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+            oScreenBinder.DQ_AddExtraFieldEntry(this.m_ExtraFieldsDS, i_TableName, i_ColumnName, i_ColumnType, i_Value);
+        }
+        #endregion
+        #region DQ_AddExtraFields_02
+        public void DQ_AddExtraField<T>(string i_TableName, string i_ColumnName, T i_Value)
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+            oScreenBinder.DQ_AddExtraFieldEntry<T>(this.m_ExtraFieldsDS, i_TableName, i_ColumnName, i_Value);
+        }
+        #endregion
+        #region DQ_AddExtraFields_03
+        public void DQ_AddExtraField<T>(string i_TableName, string i_ColumnName)
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+            oScreenBinder.DQ_AddExtraFieldEntry<T>(this.m_ExtraFieldsDS, i_TableName, i_ColumnName);
+        }
+        #endregion
+        #region DQ_PrepareControlsToBind
+        private List<Control> DQ_PrepareControlsToBind()
+        {
+            #region Declaration And Initialization Section.
+            List<Control> oList = null;
+            List<Control> oIntermediate_List = null;
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+            #region Body Section.
+            switch (this.DQ_BindLevel)
+            {
+                case Enum_BIND_LEVEL.ALL:
+                    oList = null; // In this case, the DQScreenBinder.DQ_IsControlToBind always returns true.
+                    break;
+                case Enum_BIND_LEVEL.NONE:
+                    oList = new List<Control>(); // In this case the list of controls is empty.
+                    break;
+                case Enum_BIND_LEVEL.FIELDS:
+                    oList = this.DQ_ControlsToBind;
+                    break;
+                case Enum_BIND_LEVEL.SECTIONS:
+                    oList = new List<Control>();
+                    oIntermediate_List = new List<Control>();
+                    foreach (String str_SectionName in this.DQ_SectionsToBind)
+                    {
+                        oScreenBinder.DQ_FilerControls_By_PrivateDataValue(this.Page, "DQ_SectionName", str_SectionName, oIntermediate_List, ref oList);
+                    }
+                    break;
+                //case Enum_BIND_LEVEL.TABLES:
+                //         oList              = new List<Control>();
+                //         oIntermediate_List = new List<Control>();
+                //         foreach(String str_TableName in this.DQ_TablesToBind)
+                //         {
+                //             oScreenBinder.DQ_FilerControls_By_PrivateDataValue(this.Page, "DQ_TableName", str_TableName, oIntermediate_List, ref oList);
+                //         }
+                //         break;
+                //case Enum_BIND_LEVEL.TABLES_AND_FIELDS:
+                //         oList = null;
+                //         break;
+                default:
+                    oList = this.DQ_ControlsToBind;
+                    break;
+
+            }
+            #endregion
+            #region Return Section.
+            return oList;
+            #endregion
+        }
+        #endregion
+        #region DQ_HandleEvent.
+        private void DQ_HandleEvent(ref DQ_PrePostHandler i_DQ_PrePostHandler)
+        {
+            DQ_ClearEventSubscriptions(ref i_DQ_PrePostHandler);
+        }
+        #endregion
+        #region DQ_ClearEventDelegates
+        private void DQ_ClearEventSubscriptions(ref DQ_PrePostHandler i_DQ_PrePostHandler)
+        {
+            i_DQ_PrePostHandler = (DQ_PrePostHandler)Delegate.Remove((Delegate)i_DQ_PrePostHandler, (Delegate)i_DQ_PrePostHandler);
+        }
+        #endregion
+        #region DQ_ResetGlobalDS
+        private void DQ_ResetGlobalDS(ref DataSet i_DataSet)
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            DataSet oDS = new DataSet();
+            #endregion
+            #region Body Section.
+            oScreenBinder.DQ_AddDTErrors(oDS);
+            i_DataSet = oDS;
+            #endregion
+
+        }
+        #endregion
+        #region DQ_ResetExtraFieldsDS
+        public void DQ_ResetExtraFieldsDS()
+        {
+            #region Declaration And Initialization Section.
+            DQScreenBinder.ScreenBinder oScreenBinder = new DQScreenBinder.ScreenBinder();
+            #endregion
+            #region Body Section.
+            oScreenBinder.DQ_ResetExtraFieldsDS(this.m_ExtraFieldsDS);
+            #endregion
+        }
+        #endregion
+        #region DQ_SetMasterPage.
+        public void DQ_SetMasterPage()
+        {
+            string str_DefaultMasterPageInConfigFile = string.Empty;
+            if (!String.IsNullOrEmpty(this.DQ_MasterPage))
+            {
+                this.MasterPageFile = this.DQ_MasterPage;
+            }
+            else
+            {
+                str_DefaultMasterPageInConfigFile = ConfigurationManager.AppSettings["DQ_DefaultMasterPage"];
+                this.MasterPageFile = str_DefaultMasterPageInConfigFile;
+            }
+        }
+        #endregion
+        #region DQ_SetDefaultTheme
+        private void DQ_SetDefaultTheme()
+        {
+            string str_DefaultThemeInConfigFile = ConfigurationManager.AppSettings["DQ_DefaultTheme"];
+            if (!String.IsNullOrEmpty(str_DefaultThemeInConfigFile))
+            {
+                this.Theme = str_DefaultThemeInConfigFile;
+            }
+        }
+        #endregion
+        #region DQ_Get_JavaScript_Files_To_Register
+        private void DQ_Get_JavaScript_Files_To_Register()
+        {
+            #region Declaration And Initialization Section.
+            int i_counter = 1;
+            bool isExists = true;
+            string str_CurrentFileName = string.Empty;
+            Dictionary<string, string> dic_JSFiles = new Dictionary<string, string>();
+            #endregion
+            #region Populate the Dictionary.
+            while (isExists)
+            {
+                str_CurrentFileName = ConfigurationManager.AppSettings[String.Format("DQ_JS_{0}", i_counter.ToString())];
+                if (!String.IsNullOrEmpty(str_CurrentFileName))
+                {
+                    dic_JSFiles.Add(String.Format("DQ_JS_{0}", i_counter.ToString()), str_CurrentFileName);
+                    i_counter++;
+                }
+                else
+                {
+                    isExists = false;
+                }
+            }
+            #endregion
+            #region Register Scripts.
+            DQ_RegisterJSScripts(dic_JSFiles);
+            #endregion
+        }
+        #endregion
+        #region DQ_RegisterJSScripts
+        private void DQ_RegisterJSScripts(Dictionary<string, string> i_JSScripts)
+        {
+            foreach (KeyValuePair<string, string> oKeyPair in i_JSScripts)
+            {
+                this.Page.ClientScript.RegisterClientScriptInclude(this.GetType(), oKeyPair.Key, this.Page.ResolveClientUrl(oKeyPair.Value));
+            }
+        }
+        #endregion
+        #region DQ_ScrambleQueryString
+        public string DQ_ScrambleQueryString(string i__Input)
+        {
+            #region Declaration and Initialization Section.
+            DQCrypto.DQCrypto oDQCrypto = new DQCrypto.DQCrypto();
+            string str_Return = string.Empty;
+            #endregion
+
+            #region Body Section.
+            str_Return = oDQCrypto.DQ_ScrambleQueryString(i__Input);
+            #endregion
+
+            #region Return Section.
+            return str_Return;
+            #endregion
+        }
+        #endregion
+        #region DQ_DescrambleQueryString
+        public string DQ_DescrambleQueryString(string i__Input)
+        {
+            #region Declaration and Initialization Section.
+            DQCrypto.DQCrypto oDQCrypto = new DQCrypto.DQCrypto();
+            string str_Return = string.Empty;
+            #endregion
+
+            #region Body Section.
+            str_Return = oDQCrypto.DQ_DescrambleQueryString(i__Input);
+            #endregion
+
+            #region Return Section.
+            return str_Return;
+            #endregion
+        }
+        #endregion
+        #region DQ_ParseQueryString
+        public NameValueCollection DQ_ParseQueryString(string i__Input)
+        {
+            #region Declaration and Initialization Section.
+            DQTools.cTools oTools = new DQTools.cTools();
+            NameValueCollection oNameValueCollection = new NameValueCollection();
+            #endregion
+
+            #region Body Section.
+            oNameValueCollection = oTools.DQ_ParseQueryString(i__Input);
+            #endregion
+
+            #region Return Section.
+            return oNameValueCollection;
+            #endregion
+        }
+        #endregion
+        #region OnPreInit
+        protected override void OnPreInit(EventArgs e)
+        {
+            #region DQ_SetMasterPage
+            DQ_SetMasterPage();
+            #endregion
+            #region DQ_SetUICulture
+            DQ_SetUICulture(this.Context);
+            #endregion
+           
+            base.OnPreInit(e);
+        }
+        #endregion
+        #region onInit
+        protected override void OnInit(EventArgs e)
+        {
+            base.OnInit(e);
+        }
+        #endregion
+        #region onLoad
+        protected override void OnLoad(EventArgs e)
+        {
+            #region Declaration and Initialization Section.
+            DQSessionManager.DQSessionManager oDQSessionManager = new DQSessionManager.DQSessionManager();
+            string str_SiteMapSequence_IsApplied = ConfigurationManager.AppSettings["SiteMapSequence_IsApplied"];
+            string str_LoginRedirection_IsApplied = ConfigurationManager.AppSettings["LoginRedirection_IsApplied"];
+            string str_SessionVariables_IsApplied = ConfigurationManager.AppSettings["SessionVariables_IsApplied"];
+            #endregion
+
+            #region RegisterJSMsgByCulture
+            RegisterJSMsgByCulture();
+            #endregion
+
+            #region Register Required JS Files.
+            DQ_Get_JavaScript_Files_To_Register();
+            #endregion
+
+            #region Check IsLoggedIn Session Variable.
+            if (string.IsNullOrEmpty(str_LoginRedirection_IsApplied))
+            {
+                str_LoginRedirection_IsApplied = "0";
+            }
+
+            if (str_LoginRedirection_IsApplied == "1")
+            {
+                oDQSessionManager.DQ_RedirectToLogin(this.Context);
+            }
+            #endregion
+
+            #region DQ_CheckDBSessionExistence
+            DQ_CheckDBSessionExistence();
+            #endregion
+
+            #region Get System Variables.
+            if (string.IsNullOrEmpty(str_SessionVariables_IsApplied))
+            {
+                str_SessionVariables_IsApplied = "0";
+            }
+
+            if (str_SessionVariables_IsApplied == "1")
+            {
+                oDQSessionManager.DQ_Set_SessionVariables(this.Context);
+            }
+            #endregion
+
+            #region DQ_SetSiteMapUrls
+            if (string.IsNullOrEmpty(str_SiteMapSequence_IsApplied))
+            {
+                str_SiteMapSequence_IsApplied = "0";
+            }
+
+            if (str_SiteMapSequence_IsApplied == "1")
+            {
+                if (DQ_CheckSiteMapSequence() == true)
+                {
+                    DQ_SetSiteMapUrls();
+                }
+                else
+                {
+                    throw new Exception("Not Allowed Sequence of Pages!");
+                }
+            }
+            #endregion
+
+            #region DQ_AddAjaxFeature
+            DQ_AddAjaxFeature();
+            #endregion
+
+            #region DQ_AddRequiredJSVariables
+            DQ_AddRequiredJSVariables();
+            #endregion
+           
+
+            base.OnLoad(e);
+        }
+        #endregion
+        #region DQ_GetBusinessErrorMessage
+        public string DQ_GetBusinessErrorMessage()
+        {
+            #region Declaration and Initialization Section.
+            StringBuilder oSBErrorMessage = new StringBuilder();
+            string str_ReturnValue = string.Empty;
+            DataTable oDTErrors = null;
+            #endregion
+
+            #region Body Section.
+            if (this.DQ_GlobalDS != null)
+            {
+                if (this.DQ_GlobalDS.Tables.Contains("ERRORS"))
+                {
+                    oDTErrors = this.DQ_GlobalDS.Tables["ERRORS"];
+                    foreach (DataRow oDR in oDTErrors.Rows)
+                    {
+                        if (oDR["ERROR_DESC"] != null)
+                        {
+                            oSBErrorMessage.AppendLine(oDR["ERROR_DESC"].ToString());
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region Return Section.
+            if (oSBErrorMessage != null)
+            {
+                str_ReturnValue = oSBErrorMessage.ToString();
+            }
+            return str_ReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_HandleDTErrors
+        private void DQ_HandleDTErrors()
+        {
+            #region Declaration and Initialization Section.
+            DataTable oDT_Errors = null;
+            StringBuilder oSB = new StringBuilder();
+            Boolean IsErrorExists = false;
+            DQLogger.DQLogger oDQLogger = new DQLogger.DQLogger();
+            #endregion
+            #region Body Section.
+            if (this.DQ_GlobalDS.Tables.Contains("ERRORS"))
+            {
+                oDT_Errors = this.DQ_GlobalDS.Tables["ERRORS"];
+                if (oDT_Errors.Rows.Count > 0)
+                {
+                    IsErrorExists = true;
+                }
+                foreach (DataRow oDR in oDT_Errors.Rows)
+                {
+                    oSB.AppendLine(oDR["ERROR_DESC"].ToString());
+                }
+
+            }
+
+            if (IsErrorExists == true)
+            {
+                this.Session["DQ_ErrorMessage"] = oSB.ToString();
+                Exception oException = new Exception(oSB.ToString());
+                oDQLogger.DQLogException(oException);
+                DQ_BusinessErrorNotification();
+                //this.Server.Transfer("~/Exception/DQException.aspx");
+            }
+
+            #endregion
+
+        }
+        #endregion
+        #region DQ_CheckSiteMapSequence
+        protected bool DQ_CheckSiteMapSequence()
+        {
+            string strPageURL = this.Request.Url.PathAndQuery;
+            string strParentNodeUrl;
+
+            if ((strPageURL.IndexOf("/Login/DQLogin.aspx") == -1) && (strPageURL.IndexOf("/Logout/DQLogout.aspx") == -1))
+            {
+                if ((SiteMap.CurrentNode.ParentNode != null) && (Session["DQ_SiteMapURLs"] != null))
+                {
+                    strParentNodeUrl = SiteMap.CurrentNode.ParentNode.Url;
+
+                    if (Session["DQ_SiteMapURLs"].ToString().IndexOf(strParentNodeUrl) == -1)
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        #endregion
+        #region DQ_SetSiteMapUrls
+        protected void DQ_SetSiteMapUrls()
+        {
+            #region Declaration and Initialization Section.
+            string strPageURL = string.Empty;
+            string strPageName = string.Empty;
+            string[] arrSiteMapURLs = null;
+            #endregion
+            #region Body Section.
+            //strPageURL = this.Request.Url.ToString();
+            strPageURL = this.Request.Url.PathAndQuery;
+            if ((strPageURL.IndexOf("/Login/DQLogin.aspx") == -1) && (strPageURL.IndexOf("/Logout/DQLogout.aspx") == -1))
+            {
+                //strPageURL = strPageURL.Replace("http://localhost", "");
+                //strPageName = strPageURL.Substring(0, strPageURL.LastIndexOf(".aspx") + 5);
+                strPageName = this.Request.Url.AbsolutePath;
+
+                if ((Session["DQ_SiteMapURLs"] == null) || (Session["DQ_SiteMapURLs"].ToString().IndexOf(strPageURL) == -1 && Session["DQ_SiteMapURLs"].ToString().IndexOf(strPageName) == -1))
+                {
+                    Session["DQ_SiteMapURLs"] += strPageURL + "~";
+                }
+                else if ((Session["DQ_SiteMapURLs"] == null) || (Session["DQ_SiteMapURLs"].ToString().IndexOf(strPageURL) == -1 && Session["DQ_SiteMapURLs"].ToString().IndexOf(strPageName) != -1))
+                {
+                    arrSiteMapURLs = Session["DQ_SiteMapURLs"].ToString().Split(new Char[] { '~' });
+                    for (int j = 0; j <= arrSiteMapURLs.Length - 1; j++)
+                    {
+                        if (arrSiteMapURLs[j].IndexOf(strPageName) != -1)
+                        {
+                            arrSiteMapURLs[j] = strPageURL;
+                            break;
+                        }
+                    }
+                    Session["DQ_SiteMapURLs"] = string.Join("~", arrSiteMapURLs);
+                }
+            }
+            #endregion
+
+        }
+        #endregion
+        #region DQ_AddRequiredParameters
+        private void DQ_AddRequiredParameters()
+        {
+            #region Declaration and Initialization Section.
+            #endregion
+
+            #region Body Section.
+            if (Session["DQ_SessionID"] != null)
+            {
+                this.DQ_AddParam("SessionID", Session["DQ_SessionID"].ToString());
+            }
+            else
+            {
+                this.DQ_AddParam("SessionID", Session.SessionID);
+            }
+            #endregion
+        }
+        #endregion
+        #region DQ_GetParameter
+        public string DQ_GetParameter(string i__Param_Name)
+        {
+            #region Declaration and Initialization Section.
+            string str__ReturnValue = string.Empty;
+            DataRow[] oDataRowCollection = null;
+            DataRow oDataRow = null;
+            DataTable oDT_Parameters = new DataTable();
+            string str_Filer = string.Empty;
+            #endregion
+
+            #region Body Section.
+            if (!string.IsNullOrEmpty(i__Param_Name))
+            {
+                oDT_Parameters = this.DQ_GlobalDS.Tables["PARAMETERS"];
+                str_Filer = string.Format("PARAM_NAME='{0}'", i__Param_Name);
+
+                if (oDT_Parameters != null)
+                {
+                    oDataRowCollection = oDT_Parameters.Select(string.Format("PARAM_NAME='{0}'", "PAGING_TOTAL_COUNT"));
+
+                    if (oDataRowCollection != null)
+                    {
+                        if (oDataRowCollection.Length == 1)
+                        {
+                            oDataRow = oDataRowCollection[0];
+                            if (oDataRow["PARAM_VALUE"] != null)
+                            {
+                                str__ReturnValue = oDataRow["PARAM_VALUE"].ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            #region Return Section.
+            return str__ReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_ParseClientData
+        public NameValueCollection DQ_ParseClientData(string i__Input)
+        {
+            #region Declaration and Initialization Section.
+            DQTools.cTools oTools = new DQTools.cTools();
+            NameValueCollection oNameValueCollection = new NameValueCollection();
+            #endregion
+
+            #region Body Section.
+            oNameValueCollection = oTools.DQ_ParseClientData(i__Input);
+            #endregion
+
+            #region Return Section.
+            return oNameValueCollection;
+            #endregion
+        }
+        #endregion
+        #region DQ_PrepareServerResponse
+        public string DQ_PrepareServerResponse(NameValueCollection i__NameValueCollection)
+        {
+            #region Declaration and Initialization Section.
+            string str_ReturnValue = string.Empty;
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Region.
+            str_ReturnValue = oTools.DQ_PrepareServerResponse(i__NameValueCollection);
+            #endregion
+
+            #region Return Section.
+            return str_ReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_BusinessErrorNotification
+        private void DQ_BusinessErrorNotification()
+        {
+            #region Declaration and Initialization Section.
+            StringBuilder oSB = new StringBuilder();
+            ClientScriptManager oClientScriptManager = this.Page.ClientScript;
+            #endregion
+            #region Body Section.
+            oSB.AppendLine("js_ShowBusinessError('" + this.DQ_GetBusinessErrorMessage() + "')");
+            if (!oClientScriptManager.IsStartupScriptRegistered("BusinessErrorNotification"))
+            {
+                oClientScriptManager.RegisterStartupScript(this.GetType(), "BusinessErrorNotification", oSB.ToString(), true);
+            }
+            #endregion
+        }
+        #endregion
+        #region DQ_AddAjaxFeature
+        private void DQ_AddAjaxFeature()
+        {
+            if (!(this.DesignMode))
+            {
+                if ((this.DQ_Ajax_Enabled))
+                {
+                    //-----------------------------------------------------------
+                    if ((this.DQ_Ajax_onRequest_Enabled))
+                    {
+                        if ((!string.IsNullOrEmpty(this.DQ_Ajax_onRequest_Sender)) & (!string.IsNullOrEmpty(this.DQ_Ajax_onRequest_Receiver)))
+                        {
+                            Register_JS_CallBack_Handler("onRequest", this.DQ_Ajax_onRequest_Sender, this.DQ_Ajax_onRequest_Receiver, this.DQ_Ajax_onRequest_ErrorHandler, this.DQ_Ajax_onRequest_HandleLengthyProcess, this.DQ_Ajax_onRequest_NoSenderValue);
+                        }
+                    }
+                    //-----------------------------------------------------------
+                }
+            }
+        }
+        #endregion
+        #region DQ_FillCodesDropDownList
+        public void DQ_FillCodesDropDownList(Control i_Page, DataTable i_DataTable, SortedList<string, string> i_SortedList)
+        {
+            #region Declaration and Initialization Section.
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Section.
+            oTools.DQ_FillCodesDropDownList(i_Page, i_DataTable, i_SortedList);
+            #endregion
+        }
+        #endregion
+        #region DQ_GetInnerHTMLContent
+        public string DQ_GetInnerHTMLContent(WebControl i__Control)
+        {
+            #region Declaration and Initialization Section.
+            DQTools.cTools oTools = new DQTools.cTools();
+            string str_ReturnValue = string.Empty;
+            #endregion
+
+            #region Body Section.
+            str_ReturnValue = oTools.DQ_GetInnerHTMLContent(i__Control);
+            #endregion
+
+            #region Return Section.
+            return str_ReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_AddRequiredJSVariables
+        protected void DQ_AddRequiredJSVariables()
+        {
+            #region Declaration and Initialization Section.
+            StringBuilder oSB = new StringBuilder();
+            ClientScriptManager oClientScriptManager = this.Page.ClientScript;
+            #endregion
+
+            #region Body Section.
+            oSB.AppendLine(string.Format("var js_Global_AppRoot = '{0}';", this.DQ_AppRoot));
+            if (!oClientScriptManager.IsStartupScriptRegistered("js_Global_Variables"))
+            {
+                oClientScriptManager.RegisterStartupScript(this.GetType(), "js_Global_Variables", oSB.ToString(), true);
+            }
+            #endregion
+        }
+        #endregion
+        #region DQ_GetFieldValue
+        public static T DQ_GetFieldValue<T>(DataSet i__DS, string i__TableName, String i__ColumnName, Int32 i__RowNbr)
+        {
+            #region Declaration and Initialization Section.
+            T oReturnValue = default(T);
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Section.
+            oReturnValue = oTools.DQ_GetFieldValue<T>(i__DS, i__TableName, i__ColumnName, i__RowNbr);
+            #endregion
+
+            #region Return Section.
+            return oReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_GetFieldValue
+        public static T DQ_GetFieldValue<T>(DataTable i__DT, String i__ColumnName, Int32 i__RowNbr)
+        {
+            #region Declaration and Initialization Section.
+            T oReturnValue = default(T);
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Section.
+            oReturnValue = oTools.DQ_GetFieldValue<T>(i__DT, i__ColumnName, i__RowNbr);
+            #endregion
+
+            #region Return Section.
+            return oReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_SetFieldValue
+        public static void DQ_SetFieldValue<T>(DataSet i__DS, string i__TableName, String i__ColumnName, Int32 i__RowNbr, T i__Value)
+        {
+            #region Declaraiton and Initialization Section.
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Section.
+            oTools.DQ_SetFieldValue<T>(i__DS, i__TableName, i__ColumnName, i__RowNbr, i__Value);
+            #endregion
+        }
+        #endregion
+        #region DQ_SetFieldValue
+        public static void DQ_SetFieldValue<T>(DataTable i__DT, String i__ColumnName, Int32 i__RowNbr, T i__Value)
+        {
+            #region Declaraiton and Initialization Section.
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Section.
+            oTools.DQ_SetFieldValue<T>(i__DT, i__ColumnName, i__RowNbr, i__Value);
+            #endregion
+        }
+        #endregion
+        #region DQ_GetFieldValueByFilter
+        public static T DQ_GetFieldValueByFilter<T>(DataSet i__DS, string i__TableName, String i__ColumnName, string i__FilterExpression)
+        {
+            #region Declaration and Initialization Section.
+            T oReturnValue = default(T);
+            DQTools.cTools oTools = new DQTools.cTools();
+            #endregion
+
+            #region Body Section.
+            oReturnValue = oTools.DQ_GetFieldValueByFilter<T>(i__DS, i__TableName, i__ColumnName, i__FilterExpression);
+            #endregion
+
+            #region Return Section.
+            return oReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_CheckDBSessionExistence
+        private void DQ_CheckDBSessionExistence()
+        {
+            #region Declaration and Initialization Section.
+            string str_DBSession_CheckExistence = string.Empty;
+            string str_DBSessionNonExistence_Url = string.Empty;
+            DQSessionManager.DQSessionManager oSessionManager = new DQSessionManager.DQSessionManager();
+            Boolean b_IsSessionExists = false;
+            #endregion
+
+            #region Body Section.
+            if (ConfigurationManager.AppSettings["DBSession_CheckExistence"] != null)
+            {
+                str_DBSession_CheckExistence = ConfigurationManager.AppSettings["DBSession_CheckExistence"].ToString();
+            }
+            if (ConfigurationManager.AppSettings["DBSessionNonExistence_Url"] != null)
+            {
+                str_DBSessionNonExistence_Url = ConfigurationManager.AppSettings["DBSessionNonExistence_Url"].ToString();
+            }
+
+            if ((!string.IsNullOrEmpty(str_DBSession_CheckExistence)) && (!string.IsNullOrEmpty(str_DBSessionNonExistence_Url)))
+            {
+                if (str_DBSession_CheckExistence == "1")
+                {
+                    b_IsSessionExists = oSessionManager.DQ_CheckDBSessionExistence(this.Context);
+                    if (b_IsSessionExists == false)
+                    {
+                        this.Response.Redirect(str_DBSessionNonExistence_Url);
+                    }
+                }
+            }
+            #endregion
+        }
+        #endregion
+        #region DQ_SetConnection
+        public void DQ_SetConnection(string i__Connection)
+        {
+            this.DQ_AddParam("DQCONNECTION", "AppServer://openEdge:5163/netprogress");
+        }
+        #endregion
+        #region DQ_SetUICulture
+        public void DQ_SetUICulture(HttpContext i__HttpContext)
+        {
+            #region Declaration and Initialization Section.
+            string str__Culture = string.Empty;
+            #endregion
+            #region Body Section.
+            if (i__HttpContext != null)
+            {
+                if (i__HttpContext.Session["DQCULTURE"] != null)
+                {
+                    str__Culture = i__HttpContext.Session["DQCULTURE"].ToString();
+                }
+                else
+                {
+                    str__Culture = "en";
+                }
+
+                Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(str__Culture);
+                Thread.CurrentThread.CurrentUICulture.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            }
+            #endregion
+        }
+        #endregion
+        #region DQ_GetGlobalValueForKey
+        public string DQ_GetGlobalValueForKey(string i__ResourceFile, string i__Key)
+        {
+            #region Declaration And Initialization Section.
+            string str_Value = string.Empty;
+            string str_ResourcePath = string.Empty;
+            string str_CultureName = string.Empty;
+            string str_ApplicationPath = string.Empty;
+            #endregion
+            #region Body Section.
+            if (!String.IsNullOrEmpty(i__ResourceFile))
+            {
+                str_CultureName = GetCultureName();
+                str_ApplicationPath = Request.PhysicalApplicationPath;
+                if (str_CultureName == "en")
+                {
+                    str_ResourcePath = string.Format("{0}{1}{2}.resx", str_ApplicationPath, "App_GlobalResources\\", i__ResourceFile);
+                }
+                else
+                {
+                    str_ResourcePath = string.Format("{0}{1}{2}.{3}.resx", str_ApplicationPath, "App_GlobalResources\\", i__ResourceFile, str_CultureName);
+                }
+                if ((File.Exists(str_ResourcePath)))
+                {
+                    if ((GetGlobalResourceObject(i__ResourceFile, i__Key) != null))
+                    {
+                        str_Value = GetGlobalResourceObject(i__ResourceFile, i__Key).ToString();
+                    }
+                }
+            }
+            #endregion
+            #region Return Section.
+            return str_Value;
+            #endregion
+        }
+        #endregion
+        #region DQ_GetLocalValueforKey
+        public string DQ_GetLocalValueforKey(String i__Key)
+        {
+            #region Declaration And Initiazation Section.
+            ResXResourceReader oResReader;
+            IDictionaryEnumerator IDE_Resource;
+            string str_Value = string.Empty;
+            string str_ResourcePath = string.Empty;
+            #endregion
+            #region Body Section.
+
+            str_ResourcePath = DQ_GetApp_LocalResources_Path(this.Context);
+            if ((File.Exists(str_ResourcePath)))
+            {
+                oResReader = new ResXResourceReader(str_ResourcePath);
+                IDE_Resource = oResReader.GetEnumerator();
+
+                while (IDE_Resource.MoveNext())
+                {
+                    if ((IDE_Resource.Key.ToString() == i__Key))
+                    {
+                        str_Value = IDE_Resource.Value.ToString();
+                    }
+                }
+                oResReader.Close();
+            }
+
+            #endregion
+            #region Return Section.
+            return str_Value;
+            #endregion
+        }
+        #endregion
+        #region DQ_GetApp_LocalResources_Path
+        public string DQ_GetApp_LocalResources_Path(HttpContext i__HttpContext)
+        {
+            #region Declaration And Initialization Section.
+            string str_oldLocalResPath = string.Empty;
+            string str_NewLocalPath = string.Empty;
+            string str_CutlureName = string.Empty;
+            string str_PageName = string.Empty;
+            int i_Index = -1;
+            string str_PageFolder = string.Empty;
+            #endregion
+            #region Body Section.
+            if (i__HttpContext != null)
+            {
+                str_oldLocalResPath = i__HttpContext.Request.PhysicalPath;
+                str_CutlureName = GetCultureName();
+                i_Index = str_oldLocalResPath.LastIndexOf("\\");
+                str_PageName = str_oldLocalResPath.Substring(i_Index + 1, str_oldLocalResPath.Length - i_Index - 1);
+                str_PageFolder = str_oldLocalResPath.Substring(0, i_Index + 1);
+                if (str_CutlureName == "en")
+                {
+                    str_NewLocalPath = string.Format("{0}{1}{2}.resx", str_PageFolder, "App_LocalResources\\", str_PageName);
+                }
+                else
+                {
+                    str_NewLocalPath = string.Format("{0}{1}{2}.{3}.resx", str_PageFolder, "App_LocalResources\\", str_PageName, str_CutlureName);
+                }
+            }
+            #endregion
+            #region Return Section.
+            return str_NewLocalPath;
+            #endregion
+        }
+        #endregion
+        #region GetCultureName
+        public string GetCultureName()
+        {
+            #region Declaration And Initialization Section.
+            string str_ReturnValue = string.Empty;
+            string str_LanguageName = string.Empty;
+            int i_Index = -1;
+            #endregion
+            #region Body Section.
+            str_ReturnValue = System.Threading.Thread.CurrentThread.CurrentUICulture.Name;
+            i_Index = str_ReturnValue.IndexOf("-");
+            if (i_Index >= 0)
+            {
+                str_ReturnValue = str_ReturnValue.Substring(0, i_Index);
+            }
+            #endregion
+            #region Return Section.
+            return str_ReturnValue;
+            #endregion
+        }
+        #endregion
+        #region DQ_SetLocalRessourceEntry
+        public void DQ_SetLocalRessourceEntry(string i__Key, string i__Value)
+        {
+
+            #region Declaration And Initialization Section.
+            string str_ResourcePath = string.Empty;
+            ResXResourceReader oResxReader;
+            IDictionaryEnumerator IDE_Resource;
+            ResXResourceWriter oResxWriter;
+            bool bl_Found = false;
+            #endregion
+
+
+            #region Body Section.
+            str_ResourcePath = DQ_GetApp_LocalResources_Path(this.Context);
+            if ((File.Exists(str_ResourcePath)))
+            {
+                oResxReader = new ResXResourceReader(str_ResourcePath);
+                IDE_Resource = oResxReader.GetEnumerator();
+                oResxWriter = new ResXResourceWriter(str_ResourcePath);
+
+                while (IDE_Resource.MoveNext())
+                {
+                    if ((IDE_Resource.Key.ToString() == i__Key))
+                    {
+                        bl_Found = true;
+                        oResxWriter.AddResource(IDE_Resource.Key.ToString(), i__Value);
+                    }
+                    else
+                    {
+                        oResxWriter.AddResource(IDE_Resource.Key.ToString(), IDE_Resource.Value);
+                    }
+
+                }
+
+                if ((bl_Found == false))
+                {
+                    oResxWriter.AddResource(i__Key, i__Value);
+                }
+
+                oResxWriter.Generate();
+                oResxWriter.Close();
+                oResxReader.Close();
+            }
+            #endregion
+        }
+        #endregion
+        #region DQ_SetGlobalRessourceEntry
+        public void DQ_SetGlobalRessourceEntry(string i__Key, string i__Value, string i__ResourceFile)
+        {
+
+            #region Declaration And Initialization Section.
+            string str_ResourcePath = string.Empty;
+            ResXResourceReader o_ResxReader;
+            IDictionaryEnumerator IDE_Resource;
+            ResXResourceWriter o_ResxWriter;
+            bool bl_Found = false;
+            string str_ApplicationPath = string.Empty;
+            string str_CultureName = string.Empty;
+            #endregion
+
+
+            #region Body Section.
+
+            str_ApplicationPath = Request.PhysicalApplicationPath;
+            str_CultureName = GetCultureName();
+            if (str_CultureName == "en")
+            {
+                str_ResourcePath = string.Format("{0}{1}{2}.resx", str_ApplicationPath, "App_GlobalResources\\", i__ResourceFile);
+            }
+            else
+            {
+                str_ResourcePath = string.Format("{0}{1}{2}.{3}.resx", str_ApplicationPath, "App_GlobalResources\\", i__ResourceFile, str_CultureName);
+            }
+
+            if ((File.Exists(str_ResourcePath)))
+            {
+                o_ResxReader = new ResXResourceReader(str_ResourcePath);
+                IDE_Resource = o_ResxReader.GetEnumerator();
+                o_ResxWriter = new ResXResourceWriter(str_ResourcePath);
+
+                while (IDE_Resource.MoveNext())
+                {
+                    if ((IDE_Resource.Key.ToString() == i__Key))
+                    {
+                        bl_Found = true;
+                        o_ResxWriter.AddResource(IDE_Resource.Key.ToString(), i__Value);
+                    }
+                    else
+                    {
+                        o_ResxWriter.AddResource(IDE_Resource.Key.ToString(), IDE_Resource.Value);
+                    }
+
+                }
+
+                if ((bl_Found == false))
+                {
+                    o_ResxWriter.AddResource(i__Key, i__Value);
+                }
+
+                o_ResxWriter.Generate();
+                o_ResxWriter.Close();
+                o_ResxReader.Close();
+
+            }
+            #endregion
+        }
+        #endregion
+        #region RegisterJsMsgByCulture
+        protected void RegisterJSMsgByCulture()
+        {
+            #region Declaration And Initialization Section.
+            ClientScriptManager oClientScriptManager                = this.Page.ClientScript;
+            string              str_Script                          = string.Empty;
+            string              str_CultureName                     = GetCultureName();
+            string              str_JS_GLOBALIZATION_SUPPORTED      = ConfigurationManager.AppSettings["JS_GLOBALIZATION_SUPPORTED"];
+            #endregion
+            #region Body Section.
+            str_Script = "<?xml version=\"1.0\"?><rootElement><GeneralMessage Key=\"Messages_General_ChoseThe\" Value=\"Choose the %1\"></GeneralMessage><GeneralMessage Key=\"Messages_General_TypeThe\" Value=\"Type the %1\"></GeneralMessage><GeneralMessage Key=\"Messages_General_SelectThe\" Value=\"Select the %1\"></GeneralMessage><GeneralMessage Key=\"Messages_General_IsRequired\" Value=\"%1 is required\"></GeneralMessage><GeneralMessage Key=\"Messages_General_MinLength\" Value=\"%1 should be at least %2 characters long\"></GeneralMessage><GeneralMessage Key=\"Messages_General_NotValidDate\" Value=\"%1 is not valid date.\"></GeneralMessage><GeneralMessage Key=\"Messages_General_NotValidTime\" Value=\"%1 is not a valid time\"></GeneralMessage><GeneralMessage Key=\"Messages_General_NotValidEmail\" Value=\"%1 is not a valid email address\"></GeneralMessage><GeneralMessage Key=\"Messages_General_WrongPhone\" Value=\"%1 is not a valid phone number\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Alphabetic\" Value=\"%1 should be alphabetic\"></GeneralMessage><GeneralMessage Key=\"Messages_General_AlphabeticPlus\" Value=\"%1 should be alphabeticplus\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Alphanumeric\" Value=\"%1 should be Alphanumeric\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Percentage\" Value=\"%1 should be a percentage\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Sign\" Value=\"%1 has not a valid sign\"></GeneralMessage><GeneralMessage Key=\"Messages_General_AlphabetiSpecial\" Value=\"%1 should be AlphabetiSpecial\"></GeneralMessage><GeneralMessage Key=\"Messages_General_MinMax\" Value=\"%1 should be in the following range [ %2 , %3 ]\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Integer\" Value=\"%1 should be an integer\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Decimal\" Value=\"%1 should be Decimal\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Uncommon\" Value=\"The Source and Destination Modules involved in the paste did not have the same tasks.\"></GeneralMessage><GeneralMessage Key=\"Messages_General_NegativeInteger\" Value=\"%1 should be a Negative Integer\"></GeneralMessage><GeneralMessage Key=\"Messages_General_NegativeDecimal\" Value=\"%1 should be a Negative Decimal\"></GeneralMessage><GeneralMessage Key=\"Messages_General_PhoneInternational\" Value=\"%1 is not a valid Phone International\"></GeneralMessage><GeneralMessage Key=\"Messages_General_PhoneLocal\" Value=\"%1 is not a valid  Local Phone\"></GeneralMessage><GeneralMessage Key=\"Messages_General_Mobile\" Value=\"%1 si not a valid Mobile number\"></GeneralMessage><GeneralMessage Key=\"Messages_General_PositiveInteger\" Value=\"%1 should be a positive integer\"></GeneralMessage><GeneralMessage Key=\"Messages_General_GreaterThan\" Value=\"%1 should be equal or  greater than %2\"></GeneralMessage><GeneralMessage Key=\"Messages_General_LessThan\" Value=\"%1 should be equal or  less than %2\"></GeneralMessage><GeneralMessage Key=\"Messages_General_NotValidFormat\" Value=\"%1 has not a valid format\"></GeneralMessage><GeneralMessage Key=\"Messages_General_ForExample\" Value=\"( Ex :  %1 )\"></GeneralMessage></rootElement>"; 
+            if (!string.IsNullOrEmpty(str_JS_GLOBALIZATION_SUPPORTED))
+            {
+                if (str_JS_GLOBALIZATION_SUPPORTED == "1")
+                {
+                    GetJSMessages();
+                    str_CultureName = GetCultureName();
+                    str_Script = string.Format("<script language=\"javascript\">var sXmlGeneralMessages = \'{0}\';</script>", this.Session[string.Format("DQ_JS_MSG_{0}", str_CultureName.ToUpper())].ToString());                   
+                }              
+            }
+            if (!oClientScriptManager.IsClientScriptBlockRegistered("JS_MSG"))
+            {
+                oClientScriptManager.RegisterClientScriptBlock(this.GetType(), "JS_MSG", str_Script);
+            }
+            #endregion
+        }
+        #endregion
+        #region GetJSMessages
+        protected void GetJSMessages()
+        {
+            #region Declaration And Initialization Section.
+            string str_CultureName = string.Empty;
+            string str_FilePath = string.Empty;
+            StringBuilder oSB = new StringBuilder();
+            #endregion
+            #region Body Section.
+            str_CultureName = GetCultureName();
+            if (this.Session[string.Format("DQ_JS_MSG_{0}",str_CultureName.ToUpper())] == null)
+            {                
+                if (str_CultureName == "en")
+                {
+                    str_FilePath = @"~\App_GlobalResources\Resource_JS_GEN_MSG.resx";
+                }
+                else
+                {
+                    str_FilePath = string.Format(@"~\App_GlobalResources\Resource_JS_GEN_MSG.{0}.resx", str_CultureName);
+                }
+
+                ResXResourceReader oResXResourceReader = new ResXResourceReader(Server.MapPath(str_FilePath));
+                oSB.Append("<?xml version=\"1.0\" encoding=\"utf-8\" ?><rootElement>");
+                foreach (DictionaryEntry oDictionaryEntry in oResXResourceReader)
+                {
+                    oSB.Append(string.Format("<GeneralMessage Key=\"{0}\" Value=\"{1}\"></GeneralMessage>", oDictionaryEntry.Key.ToString(), oDictionaryEntry.Value.ToString()));
+                }
+                oSB.Append("</rootElement>");
+
+                this.Session.Add(string.Format("DQ_JS_MSG_{0}", str_CultureName.ToUpper()), oSB.ToString());
+            }
+            #endregion
+        }
+        #endregion
+
+    }
+}
