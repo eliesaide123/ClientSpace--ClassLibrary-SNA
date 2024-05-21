@@ -54,7 +54,7 @@
     </Reference>
     <Reference Include="DQServiceLayer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\DQServiceLayer\bin\Debug\DQServiceLayer.dll</HintPath>
+      <HintPath>bin\Debug\DQServiceLayer.dll</HintPath>
     </Reference>
     <Reference Include="Progress.Messages, Version=10.2.2.1519, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
