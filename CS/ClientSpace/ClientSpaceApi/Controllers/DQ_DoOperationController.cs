@@ -16,6 +16,7 @@ namespace ClientSpaceApi.Controllers
         {
             try
             {
+                Console.WriteLine("Elie");
                 // Extract the properties from the dynamic object
                 string operatorDSJson = data.operatorDS.ToString();
                 string paramString = data.paramString.ToString();
