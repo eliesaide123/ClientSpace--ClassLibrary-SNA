@@ -1,4 +1,5 @@
 ﻿using ClientSpaceApi.Classes;
+using DQOperator;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -22,14 +23,14 @@ namespace ClientSpaceApi.Controllers
 
                 // Deserialize the JSON strings to their respective types
                 DataSet OperatorDS = JsonConvert.DeserializeObject<DataSet>(operatorDSJson);
-                NameValueCollection Params = JsonConvert.DeserializeObject<Dictionary<string, string>>(paramString)
-                                              .ToNameValueCollection();
+                List<DQParam> Params = JsonConvert.DeserializeObject<List<DQParam>>(paramString);
 
                 // Create an instance of the operation class and perform the operation
                 DQOperator.DQOperator _operation = new DQOperator.DQOperator();
                 _operation.DQ_DoOperation(ref OperatorDS, Params);
 
-                return Ok("Data Operation performed Successfully.");
+                
+                return Ok(JsonConvert.SerializeObject(OperatorDS, Newtonsoft.Json.Formatting.None));
             }
             catch (Exception ex)
             {

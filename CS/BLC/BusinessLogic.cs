@@ -8,6 +8,8 @@ using System.Data;
 using System.Collections.Specialized;
 using BLC.Service;
 using RestSharp;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace BLC
 {
@@ -17,12 +19,22 @@ namespace BLC
         public BusinessLogic() {
             _callApi = new ServiceCallApi();
         }
-        public bool Authenticate(CredentialsDto credentials)
+        public async void GetSession(string sessionId)
         {
             DataSet OperatorDS = new DataSet();
-            NameValueCollection Params = new NameValueCollection();
-            Params["TASK_NAME"] = "DQWebAuthentication";
-            Params["CONVERTER_NAME"] = "Conv_DQWebAuthentication";
+            List<DQParam> Params = new List<DQParam>();
+            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQNewSession", Type = "" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type= ""});
+            _callApi.PostApiData("/api/DQ_DoOperation", ref OperatorDS, Params);
+
+        }
+        public CredentialsDto Authenticate(CredentialsDto credentials)
+        {
+            DataSet OperatorDS = new DataSet();
+            List<DQParam> Params = new List<DQParam>();
+            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQWebAuthentication", Type = "" });
+            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value= "Conv_DQWebAuthentication", Type="" });
+            Params.Add(new DQParam() { Name = "SessionID", Value= credentials.SessionID, Type="Q" });
 
             // Add your logic to create and populate the DataSet
             DataTable credentialsTable = new DataTable("Credentials");
@@ -39,11 +51,13 @@ namespace BLC
             row["Password"] = credentials.Password;
             row["ClientType"] = credentials.ClientType;
             row["SessionID"] = credentials.SessionID;
+            row["IsAuthenticated"] = credentials.IsAuthenticated;
+            row["IsFirstLogin"] = credentials.IsFirstLogin;
 
             credentialsTable.Rows.Add(row);
             OperatorDS.Tables.Add(credentialsTable);
 
-            var data = _callApi.PostApiDataAsync("/api/DQ_DoOperation", OperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", ref OperatorDS, Params);
 
             //if (DQOperator.DQOperator.DQ_GlobalDS.Tables["Credentials"] != null)
             //{
@@ -55,7 +69,15 @@ namespace BLC
             //}
 
 
-            return false;
+            return new CredentialsDto()
+            {
+                Username = OperatorDS.Tables["Credentials"].Rows[0]["User_ID"].ToString(),
+                Password = OperatorDS.Tables["Credentials"].Rows[0]["Password"].ToString(),
+                ClientType = OperatorDS.Tables["Credentials"].Rows[0]["ClientType"].ToString(),
+                SessionID = OperatorDS.Tables["Credentials"].Rows[0]["SessionID"].ToString(),
+                IsAuthenticated = Convert.ToBoolean(OperatorDS.Tables["Credentials"].Rows[0]["IsAuthenticated"].ToString()),
+                IsFirstLogin = Convert.ToBoolean(OperatorDS.Tables["Credentials"].Rows[0]["IsFirstLogin"].ToString())
+            };
         }
     }
 }

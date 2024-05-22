@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Entities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -6,6 +8,8 @@ using System.Collections.Specialized;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
@@ -22,12 +26,13 @@ namespace BLC.Service
             _httpClient = new HttpClient();
             _client = new RestClient("http://localhost:49366");
         }
-        public async Task<bool> PostApiDataAsync(string url, DataSet operatorDS, NameValueCollection Params)
+        public void PostApiData(string url, ref DataSet operatorDS, List<DQParam> Params)
         {
             try
             {
-                // Serialize NameValueCollection to a dictionary
-                var paramDict = Params.Cast<string>().ToDictionary(k => k, k => Params[k]);
+
+                // Serialize List<DQParam> to a dictionary
+                var paramJson = JsonConvert.SerializeObject(Params, Newtonsoft.Json.Formatting.Indented);
 
                 // Serialize the DataSet to JSON
                 string operatorDSJson = JsonConvert.SerializeObject(operatorDS, Newtonsoft.Json.Formatting.Indented);
@@ -36,7 +41,7 @@ namespace BLC.Service
                 var bodyContent = new
                 {
                     operatorDS = operatorDSJson,
-                    paramString = JsonConvert.SerializeObject(paramDict) // Ensure paramDict is serialized to JSON string
+                    paramString = paramJson
                 };
 
                 // Serialize the combined object to JSON
@@ -44,17 +49,59 @@ namespace BLC.Service
 
                 var request = new RestRequest(url, Method.Post);
                 request.AddStringBody(requestBody, ContentType.Json); // Use AddStringBody to add the serialized JSON as the request body
+                                                                      // Execute the async request synchronously
+                var responseTask = _client.ExecuteAsync(request);
+                responseTask.Wait();
+                var response = responseTask.Result;
 
-                var response = await _client.ExecuteAsync(request);
-                var responseBody = response.Content;
-                return responseBody != string.Empty ? true : false ;
+                if (response.IsSuccessful)
+                {
+                    RebuildDataSet(response.Content, ref operatorDS);
+                }
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine($"Request error: {e.Message}");
-                return false;
             }
         }
 
+        public void RebuildDataSet(string responseContent, ref DataSet operatorDS)
+        {
+            var content = responseContent;
+
+            string cleanedJsonString = content.Trim('"').Replace("\\", "");
+
+            Dictionary<string, object> jsonDictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(cleanedJsonString);
+
+            operatorDS.Tables.Clear();
+
+            foreach (var kvp in jsonDictionary)
+            {
+                string tableName = kvp.Key;
+                JArray tableData = (JArray)kvp.Value;
+
+                DataTable dataTable = new DataTable(tableName);
+
+                if (tableData.Count > 0)
+                {
+                    var firstObject = tableData[0];
+                    foreach (JProperty column in firstObject)
+                    {
+                        dataTable.Columns.Add(column.Name, typeof(string));
+                    }
+                }
+
+                foreach (var row in tableData)
+                {
+                    DataRow dataRow = dataTable.NewRow();
+                    foreach (JProperty column in ((JObject)row).Properties())
+                    {
+                        dataRow[column.Name] = column.Value.ToString();
+                    }
+                    dataTable.Rows.Add(dataRow);
+                }
+                operatorDS.Tables.Add(dataTable);
+            }
+        }
     }
 }
