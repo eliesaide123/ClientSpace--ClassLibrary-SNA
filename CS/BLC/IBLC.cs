@@ -9,6 +9,7 @@ namespace BLC
 {
     public interface IBLC
     {
-        bool Authenticate(CredentialsDto credentials);
+        void GetSession(string sessionId);
+        CredentialsDto Authenticate(CredentialsDto credentials);
     }
 }
