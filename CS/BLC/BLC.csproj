@@ -13,13 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DQBasePage\DQBasePage.csproj" />
+    <ProjectReference Include="..\..\..\DQOperator\DQOperator.csproj" />
+    <ProjectReference Include="..\..\..\DQBasePage\DQBasePage.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="DQBasePage">
+      <HintPath>bin\Debug\net8.0\DQBasePage.dll</HintPath>
+    </Reference>
     <Reference Include="DQOperator">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQOperator.dll</HintPath>
+      <HintPath>bin\Debug\net8.0\DQOperator.dll</HintPath>
     </Reference>
   </ItemGroup>
 

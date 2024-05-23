@@ -52,6 +52,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\DQOperator\bin\Debug\DQOperator.dll</HintPath>
     </Reference>
+    <Reference Include="DQServiceLayer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\DQServiceLayer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Progress.Messages, Version=11.7.0.1811, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>bin\Progress.Messages.dll</HintPath>
@@ -324,12 +328,6 @@
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\DQServiceLayer\DQServiceLayer.csproj">
-      <Project>{64518a46-0f53-4585-96d8-4851e0a33dc9}</Project>
-      <Name>DQServiceLayer</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
