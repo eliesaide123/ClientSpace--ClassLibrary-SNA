@@ -8,18 +8,21 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\DQBasePage\DQBasePage.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="DQBasePage">
+      <HintPath>..\..\..\DQBasePage\bin\Debug\DQBasePage.dll</HintPath>
+    </Reference>
     <Reference Include="DQOperator">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQOperator.dll</HintPath>
+      <HintPath>..\..\..\DQOperator\bin\Debug\DQOperator.dll</HintPath>
     </Reference>
   </ItemGroup>
 
