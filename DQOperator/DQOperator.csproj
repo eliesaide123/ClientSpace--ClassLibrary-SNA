@@ -48,21 +48,17 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DQScreenBinder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\DQScreenBinder.dll</HintPath>
+    <Reference Include="DQScreenBinder">
+      <HintPath>..\..\DQOperator\bin\Debug\DQScreenBinder.dll</HintPath>
     </Reference>
-    <Reference Include="DQServiceLayer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\DQServiceLayer.dll</HintPath>
+    <Reference Include="DQServiceLayer">
+      <HintPath>..\..\DQOperator\bin\Debug\DQServiceLayer.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.Messages, Version=10.2.2.1519, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Progress.Messages.dll</HintPath>
+    <Reference Include="Progress.Messages">
+      <HintPath>..\..\DQOperator\bin\Debug\Progress.Messages.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.o4glrt, Version=10.2.2.1519, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\Progress.o4glrt.dll</HintPath>
+    <Reference Include="Progress.o4glrt">
+      <HintPath>..\..\DQOperator\bin\Debug\Progress.o4glrt.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

@@ -63,33 +63,26 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DQDataEngine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\DQDataEngine\bin\Debug\DQDataEngine.dll</HintPath>
+    <Reference Include="DQDataEngine">
+      <HintPath>..\..\DQOperator\bin\Debug\DQDataEngine.dll</HintPath>
     </Reference>
-    <Reference Include="DQLogger, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\DQLogger\bin\Debug\DQLogger.dll</HintPath>
+    <Reference Include="DQLogger">
+      <HintPath>..\..\DQOperator\bin\Debug\DQLogger.dll</HintPath>
     </Reference>
-    <Reference Include="DQTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\DQTools.dll</HintPath>
+    <Reference Include="DQTools">
+      <HintPath>..\..\DQOperator\bin\Debug\DQTools.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\inetpub\wwwroot\MedGulfWeb\Bin\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\DQServiceLayer\bin\Debug\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.Messages, Version=10.1.0.41177, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Progress.Messages.dll</HintPath>
+    <Reference Include="Progress.Messages">
+      <HintPath>..\..\DQOperator\bin\Debug\Progress.Messages.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.o4glrt, Version=10.1.0.41280, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Progress.o4glrt.dll</HintPath>
+    <Reference Include="Progress.o4glrt">
+      <HintPath>..\..\DQOperator\bin\Debug\Progress.o4glrt.dll</HintPath>
     </Reference>
-    <Reference Include="Resolver, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\DQDataEngine\bin\Debug\Resolver.dll</HintPath>
+    <Reference Include="Resolver">
+      <HintPath>..\..\DQOperator\bin\Debug\Resolver.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

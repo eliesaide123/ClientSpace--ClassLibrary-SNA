@@ -51,33 +51,33 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DQCrypto, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="DQLogger, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
-    <Reference Include="DQOperator">
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\DQOperator.dll</HintPath>
+    <Reference Include="DQCrypto">
+      <HintPath>..\..\DQBasePage\bin\Debug\DQCrypto.dll</HintPath>
     </Reference>
-    <Reference Include="DQScreenBinder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\DQScreenBinder.dll</HintPath>
+    <Reference Include="DQLogger">
+      <HintPath>..\..\DQBasePage\bin\Debug\DQLogger.dll</HintPath>
+    </Reference>
+    <Reference Include="DQOperator">
+      <HintPath>..\..\DQBasePage\bin\Debug\DQOperator.dll</HintPath>
+    </Reference>
+    <Reference Include="DQScreenBinder">
+      <HintPath>..\..\DQBasePage\bin\Debug\DQScreenBinder.dll</HintPath>
     </Reference>
     <Reference Include="DQServiceLayer">
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\DQServiceLayer.dll</HintPath>
+      <HintPath>..\..\DQBasePage\bin\Debug\DQServiceLayer.dll</HintPath>
     </Reference>
     <Reference Include="DQSessionManager">
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\DQSessionManager.dll</HintPath>
+      <HintPath>..\..\DQBasePage\bin\Debug\DQSessionManager.dll</HintPath>
     </Reference>
-    <Reference Include="DQTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\DQTools.dll</HintPath>
+    <Reference Include="DQTools">
+      <HintPath>..\..\DQBasePage\bin\Debug\DQTools.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Progress.Messages, Version=10.2.2.1519, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\Progress-DLL-117\Progress.Messages.dll</HintPath>
+    <Reference Include="Progress.Messages">
+      <HintPath>..\..\DQBasePage\bin\Debug\Progress.Messages.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.o4glrt, Version=10.2.2.1519, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Git\Arope-ClientSpace\AropeClientSpace\BinRef\Progress-DLL-117\Progress.o4glrt.dll</HintPath>
+    <Reference Include="Progress.o4glrt">
+      <HintPath>..\..\DQBasePage\bin\Debug\Progress.o4glrt.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
