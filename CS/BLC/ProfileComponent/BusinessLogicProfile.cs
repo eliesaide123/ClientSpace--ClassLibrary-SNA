@@ -1,6 +1,7 @@
 ﻿using BLC.Service;
 using Entities;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -21,18 +22,38 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
         }
-        public void DQ_GetUserAccount(CredentialsDto credentials)
+        public string DQ_GetUserAccount(CredentialsDto credentials)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetUserAccount", Type = "" });
             Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
+            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "" });
+            Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
 
             DQ_GetUserAccount_TPIDENT_ExtraFields();
             DQ_GetUserAccount_TPVALIDSET_ExtraFields();
             DQ_GetUserAccount_Add_Codes_ExtraFields();
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            RemoveFirstRows();
+
+            var userAccount = new UserAccount()
+            {
+                Username = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-UserId"].ToString(),
+                Password = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-Pwd"].ToString(),
+                Email = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-Email"].ToString(),
+                Mobile = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-Mobile"].ToString(),
+                UserLang = Convert.ToInt32(GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-UserLang"]),
+                ContactScenario = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-ContactScenario"].ToString(),
+                RegType = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-RegType"].ToString(),
+                Question = GlobalOperatorDS.Tables["TPVALIDSET"].Rows[0]["TP-Question"].ToString(),
+                Answer = GlobalOperatorDS.Tables["TPVALIDSET"].Rows[0]["TP-Answer"].ToString(),
+            };
+
+            string[] questions = ExtractEngFullValues();
+
+            return JsonConvert.SerializeObject(new { userAccount, questions });
         }
 
         public void DQ_GetUserAccount_TPIDENT_ExtraFields()
@@ -94,6 +115,30 @@ namespace BLC.ProfileComponent
             row["Eng_Full"] = "";
             dataTable.Rows.Add(row);
             GlobalOperatorDS.Tables.Add(dataTable);
+        }
+
+        public void RemoveFirstRows()
+        {
+            // Remove the first row of each DataTable if they exist, excluding specific tables
+            foreach (DataTable table in GlobalOperatorDS.Tables)
+            {
+                if (table.Rows.Count > 0 && table.TableName != "PARAMETERS" && table.TableName != "NOTIFICATION")
+                {
+                    table.Rows[0].Delete();
+                    table.AcceptChanges();
+                }
+            }
+        }
+
+        public string[] ExtractEngFullValues()
+        {
+            // Use LINQ to filter rows where "Tbl_Name" is the specified value and select "Eng_Full"
+            var query = from row in GlobalOperatorDS.Tables["Codes"].AsEnumerable()
+                        where row.Field<string>("Tbl_Name") == "_CSQuestions"
+                        select row.Field<string>("Eng_Full");
+
+            // Convert the result to an array
+            return query.ToArray();
         }
     }
 }

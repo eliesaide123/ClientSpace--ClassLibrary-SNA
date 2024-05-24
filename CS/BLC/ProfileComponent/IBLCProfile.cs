@@ -9,9 +9,11 @@ namespace BLC.ProfileComponent
 {
     public interface IBLCProfile
     {
-        void DQ_GetUserAccount(CredentialsDto credentials);
+        string DQ_GetUserAccount(CredentialsDto credentials);
         void DQ_GetUserAccount_TPIDENT_ExtraFields();
         void DQ_GetUserAccount_TPVALIDSET_ExtraFields();
         void DQ_GetUserAccount_Add_Codes_ExtraFields();
+        void RemoveFirstRows();
+        string[] ExtractEngFullValues();
     }
 }
