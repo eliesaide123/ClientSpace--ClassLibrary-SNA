@@ -9,5 +9,6 @@ namespace BLC
     public interface ISessionManager
     {
         void SetSessionValue(string key, string value);
+        string GetSessionValue(string key);
     }
 }

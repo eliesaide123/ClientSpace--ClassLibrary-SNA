@@ -13,14 +13,15 @@ using Newtonsoft.Json;
 using System.Web;
 using Microsoft.AspNetCore.Http;
 
-namespace BLC
+namespace BLC.LoginComponent
 {
-    public class BusinessLogic : IBLC
+    public class BusinessLogicLogin : IBLCLogin
     {
         private readonly ServiceCallApi _callApi;
         public DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
-        public BusinessLogic(IHttpContextAccessor httpContextAccessor) {
+        public BusinessLogicLogin(IHttpContextAccessor httpContextAccessor)
+        {
             _callApi = new ServiceCallApi();
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
@@ -30,7 +31,7 @@ namespace BLC
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQNewSession", Type = "" });
-            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type= ""});
+            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "" });
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
         }
@@ -39,8 +40,8 @@ namespace BLC
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQWebAuthentication", Type = "" });
-            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value= "Conv_DQWebAuthentication", Type="" });
-            Params.Add(new DQParam() { Name = "SessionID", Value= credentials.SessionID, Type="Q" });
+            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_DQWebAuthentication", Type = "" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
 
             // Add your logic to create and populate the DataSet
             DataTable credentialsTable = new DataTable("Credentials");
@@ -89,7 +90,7 @@ namespace BLC
         public NameValueCollection IsFirstLogin(CredentialsDto credentials)
         {
             NameValueCollection oServerResponse = new NameValueCollection();
-            
+
             if (credentials.IsAuthenticated)
             {
                 _sessionManager.SetSessionValue("DQ_SessionID", credentials.SessionID);

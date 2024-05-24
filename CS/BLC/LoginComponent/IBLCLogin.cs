@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Entities;
 
-namespace BLC
+namespace BLC.LoginComponent
 {
-    public interface IBLC
+    public interface IBLCLogin
     {
         void GetSession(string sessionId);
         CredentialsDto Authenticate(CredentialsDto credentials);

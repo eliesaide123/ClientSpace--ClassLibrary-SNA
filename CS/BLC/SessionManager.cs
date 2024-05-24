@@ -21,5 +21,14 @@ namespace BLC
             byte[] byteArray = Encoding.UTF8.GetBytes(value);
             _httpContextAccessor.HttpContext.Session.Set(key, byteArray);
         }
+        public string GetSessionValue(string key)
+        {
+            byte[] byteArray;
+            if (_httpContextAccessor.HttpContext.Session.TryGetValue(key, out byteArray))
+            {
+                return Encoding.UTF8.GetString(byteArray);
+            }
+            return null;
+        }
     }
 }
