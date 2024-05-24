@@ -64,13 +64,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DQDataEngine">
-      <HintPath>..\..\DQOperator\bin\Debug\DQDataEngine.dll</HintPath>
+      <HintPath>..\..\DQServiceLayer\bin\Debug\DQDataEngine.dll</HintPath>
     </Reference>
     <Reference Include="DQLogger">
-      <HintPath>..\..\DQOperator\bin\Debug\DQLogger.dll</HintPath>
+      <HintPath>..\..\DQServiceLayer\bin\Debug\DQLogger.dll</HintPath>
     </Reference>
     <Reference Include="DQTools">
-      <HintPath>..\..\DQOperator\bin\Debug\DQTools.dll</HintPath>
+      <HintPath>..\..\DQServiceLayer\bin\Debug\DQTools.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\DQServiceLayer\bin\Debug\Newtonsoft.Json.dll</HintPath>
@@ -82,7 +82,7 @@
       <HintPath>..\..\DQOperator\bin\Debug\Progress.o4glrt.dll</HintPath>
     </Reference>
     <Reference Include="Resolver">
-      <HintPath>..\..\DQOperator\bin\Debug\Resolver.dll</HintPath>
+      <HintPath>..\..\DQServiceLayer\bin\Debug\Resolver.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

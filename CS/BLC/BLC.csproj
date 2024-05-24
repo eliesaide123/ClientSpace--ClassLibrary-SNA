@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\DQOperator\DQOperator.csproj" />
-    <ProjectReference Include="..\..\..\DQBasePage\DQBasePage.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
   </ItemGroup>
 
