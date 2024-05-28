@@ -57,11 +57,38 @@ namespace BLC.RolesComponent
                         oUserIdent.LoggedDate = DateTime.Now.ToShortDateString();
 
                         _sessionManager.SetSessionValue("DQUserIdent", JsonConvert.SerializeObject(oUserIdent));
-                        return JsonConvert.SerializeObject(true);
+                        return JsonConvert.SerializeObject(JsonConvert.SerializeObject(oUserIdent));
                     }
                 }
             }
             return JsonConvert.SerializeObject(false);
+        }
+
+        public string SetRole(string sessionId, string roleId)
+        {
+            GlobalOperatorDS.Tables.Clear();
+            List<DQParam> Params = new List<DQParam>();
+            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "SetRoles", Type = "" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type="Q" });
+            Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
+
+            DataTable dt = new DataTable("VARIABLES");
+            dt.Columns.Add("ATTRIBUTE", typeof(string));
+            dt.Columns.Add("STR_VALUE", typeof(string));
+            dt.Columns.Add("VAL_FORMAT", typeof(string));
+            dt.Columns.Add("VAR_TYPE", typeof(string));
+            DataRow row = dt.NewRow();
+            row["ATTRIBUTE"] = "";
+            row["STR_VALUE"] = "";
+            row["VAL_FORMAT"] = "";
+            row["VAR_TYPE"] = "";
+            dt.Rows.Add(row);
+            GlobalOperatorDS.Tables.Add(dt);
+
+            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            return string.Empty;
         }
 
         public void DQ_GetUserAccount_Add_Codes_ExtraFields()

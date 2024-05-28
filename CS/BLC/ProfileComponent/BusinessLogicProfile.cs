@@ -1,5 +1,6 @@
 ﻿using BLC.Service;
 using Entities;
+using Entities.JSONResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -64,21 +65,21 @@ namespace BLC.ProfileComponent
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetClientInfo", Type = "" });
             Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
-            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetClientInfo" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type="Q" });
             Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
             Params.Add(new DQParam() { Name = "OnlineSales", Value = "", Type="O" });
             Params.Add(new DQParam() { Name = "OnlineAgt", Value = "", Type="O" });
+            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetClientInfo" });
             Params.Add(new DQParam() { Name = "AgtCode", Value = "", Type="O" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type="Q" });
 
             DQ_GetClientInfo_ExtraFields_Persons();
             DQ_GetHolderProduct_ExtraFields_Product();
             DQ_GetClientInfo_ExtraFields_Codes();
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
-            RemoveFirstRows();
+            RemoveFirstRowPersons();
 
-            //_sessionManager.SetSessionValue("DQ_OnlineSales", ""); //DQ_GetParameter("OnlineSales");
+            _sessionManager.SetSessionValue("DQ_OnlineSales", ""); //DQ_GetParameter("OnlineSales");
 
             //if (!string.IsNullOrEmpty(DQ_GetParameter("OnlineAgt")))
             //{
@@ -89,14 +90,34 @@ namespace BLC.ProfileComponent
             //{
             //    Session["AgtCode"] = DQ_GetParameter("AgtCode");
             //}
-            return string.Empty;
+
+            var jsonResponse = SortingDS();
+            return jsonResponse;
         }
+
+        //public string GetPortfolio (int sessionId, string roleId)
+        //{
+        //    GlobalOperatorDS.Tables.Clear();
+        //    List<DQParam> Params = new List<DQParam>();
+        //    Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetPortfolio" });
+        //    Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetPortfolio" });
+        //    Params.Add(new DQParam() { Name = "CATEGORY", Value = "-ALL-", Type = "Q" });
+        //    Params.Add(new DQParam() { Name = "PRODUCT", Value = "-ALL-", Type = "Q" });
+        //    Params.Add(new DQParam() { Name = "INFORCEONLY", Value = true.ToString(), Type = "Q" });
+        //    Params.Add(new DQParam() { Name = "POLICYNO", Value = "", Type = "Q" });
+        //Me.DQ_AddParam("POLICYNO", Me.m_PolicyNo, "Q")
+        //Me.DQ_AddParam("PAGING_DIRECTION", "", "O")
+        //Me.DQ_AddParam("PAGING_START_INDEX", i__StartIndex, "O")
+        //Me.DQ_AddParam("PAGING_PAGE_SIZE", Me.DQ_GetConfigEntry("GRID_PAGE_SIZE"), "Q")
+        //Me.DQ_AddParam("PAGING_ACTION", i__Action, "Q")
+        //Me.DQ_AddParam("HolderLabel", "", "O")
+        //}
 
         public void DQ_GetClientInfo_ExtraFields_Persons()
         {
             DataTable personsTable = new DataTable("Persons");
 
-            personsTable.Columns.Add("PIN", typeof(int));
+            personsTable.Columns.Add("PIN", typeof(Int32));
             personsTable.Columns.Add("Age", typeof(string));
             personsTable.Columns.Add("Marital", typeof(string));
             personsTable.Columns.Add("Per_Title", typeof(string));
@@ -107,9 +128,9 @@ namespace BLC.ProfileComponent
             personsTable.Columns.Add("Profession", typeof(string));
             personsTable.Columns.Add("Address", typeof(string));
             personsTable.Columns.Add("EntityType", typeof(string));
-            personsTable.Columns.Add("DOB_Day", typeof(int));
-            personsTable.Columns.Add("DOB_Month", typeof(int));
-            personsTable.Columns.Add("DOB_Year", typeof(int));
+            personsTable.Columns.Add("DOB_Day", typeof(Int32));
+            personsTable.Columns.Add("DOB_Month", typeof(Int32));
+            personsTable.Columns.Add("DOB_Year", typeof(Int32));
             personsTable.Columns.Add("HasRequest", typeof(bool));
             personsTable.Columns.Add("HasUnpaid", typeof(bool));
             personsTable.Columns.Add("HasClaims", typeof(bool));
@@ -127,18 +148,22 @@ namespace BLC.ProfileComponent
             DataRow row = personsTable.NewRow();
             foreach (DataColumn column in personsTable.Columns)
             {
-                if (column.DataType == typeof(string))
+                switch (column.DataType)
                 {
-                    row[column.ColumnName] = string.Empty;
+                    case Type t when t == typeof(string):
+                        row[column.ColumnName] = string.Empty;
+                        break;
+                    case Type t when t == typeof(int) || t == typeof(Int32):
+                        row[column.ColumnName] = 0; // Default value for int
+                        break;
+                    case Type t when t == typeof(bool):
+                        row[column.ColumnName] = false; // Default value for bool
+                        break;
+                    case Type t when t == typeof(double):
+                          row[column.ColumnName] = 0;
+                        break;
                 }
-                else if (column.DataType == typeof(int))
-                {
-                    row[column.ColumnName] = 0; // Default value for int
-                }
-                else if (column.DataType == typeof(bool))
-                {
-                    row[column.ColumnName] = false; // Default value for bool
-                }
+
                 // Add additional type checks if needed
             }
             personsTable.Rows.Add(row);
@@ -250,6 +275,18 @@ namespace BLC.ProfileComponent
                 }
             }
         }
+        public void RemoveFirstRowPersons()
+        {
+            // Remove the first row of each DataTable if they exist, excluding specific tables
+            foreach (DataTable table in GlobalOperatorDS.Tables)
+            {
+                if (table.Rows.Count > 0 && table.TableName == "Persons")
+                {
+                    table.Rows[0].Delete();
+                    table.AcceptChanges();
+                }
+            }
+        }
 
         public string[] ExtractEngFullValues()
         {
@@ -260,6 +297,70 @@ namespace BLC.ProfileComponent
 
             // Convert the result to an array
             return query.ToArray();
+        }
+
+        public string SortingDS()
+        {
+            DataRow row = GlobalOperatorDS.Tables["Persons"].Rows[0];
+            var person = new Person()
+            {
+                PIN = row["PIN"]?.ToString() != string.Empty ? Convert.ToInt32(row["PIN"]) : 0,
+                Age = row["Age"]?.ToString() ?? string.Empty,
+                Marital = row["Marital"]?.ToString() ?? string.Empty,
+                Per_Title = row["Per_Title"]?.ToString() ?? string.Empty,
+                FirstName = row["FirstName"]?.ToString() ?? string.Empty,
+                Father = row["Father"]?.ToString() ?? string.Empty,
+                Family = row["Family"]?.ToString() ?? string.Empty,
+                FullName = row["FullName"]?.ToString() ?? string.Empty,
+                Profession = row["Profession"]?.ToString() ?? string.Empty,
+                Address = row["Address"]?.ToString() ?? string.Empty,
+                EntityType = row["EntityType"]?.ToString() ?? string.Empty,
+                DOB_Day = row["DOB_Day"]?.ToString() != string.Empty ? Convert.ToInt32(row["DOB_Day"]) : (int?)null,
+                DOB_Month = row["DOB_Month"]?.ToString() != string.Empty ? Convert.ToInt32(row["DOB_Month"]) : (int?)null,
+                DOB_Year = row["DOB_Year"]?.ToString() != string.Empty ? Convert.ToInt32(row["DOB_Year"]) : (int?)null,
+                HasRequest = row["HasRequest"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasRequest"]) : false,
+                HasUnpaid = row["HasUnpaid"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasUnpaid"]) : false,
+                HasClaims = row["HasClaims"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasClaims"]) : false,
+                HasRenewal = row["HasRenewal"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasRenewal"]) : false,
+                HasFresh = row["HasFresh"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasFresh"]) : false,
+                KYC = row["KYC"]?.ToString() != string.Empty ? Convert.ToBoolean(row["KYC"]) : false,
+                ShowProfile = row["ShowProfile"]?.ToString() != string.Empty ? Convert.ToBoolean(row["ShowProfile"]) : false,
+                ShowMissing = row["ShowMissing"]?.ToString() != string.Empty ? Convert.ToBoolean(row["ShowMissing"]) : false,
+                AgentSOA = row["AgentSOA"]?.ToString() != string.Empty ? Convert.ToBoolean(row["AgentSOA"]) : false,
+                RPSEnabled = row["RPSEnabled"]?.ToString() != string.Empty ? Convert.ToBoolean(row["RPSEnabled"]) : false,
+                YearMonth = row["YearMonth"]?.ToString() ?? string.Empty,
+                KYCMSG = row["KYCMSG"]?.ToString() ?? string.Empty,
+                CONVERT_DATA = row["CONVERT_DATA"]?.ToString() ?? string.Empty,
+            };
+
+            var products = DataTableToArray("Product");
+            var codes = DataTableToArray("Codes");
+
+            var jsonToSend = new GetClientInfoResponseDto()
+            {
+                Person = person,
+                Products = products,
+                Codes = codes
+            };
+
+            return JsonConvert.SerializeObject(jsonToSend);
+        }
+
+        public string[][] DataTableToArray(string TableName)
+        {
+            int rowCount = GlobalOperatorDS.Tables[TableName].Rows.Count;
+            int columnCount = GlobalOperatorDS.Tables[TableName].Columns.Count;
+            string[][] result = new string[rowCount][];
+
+            for (int i = 0; i < rowCount; i++)
+            {
+                result[i] = new string[columnCount];
+                for (int j = 0; j < columnCount; j++)
+                {
+                    result[i][j] = GlobalOperatorDS.Tables[TableName].Rows[i][j].ToString();
+                }
+            }
+            return result;
         }
     }
 }

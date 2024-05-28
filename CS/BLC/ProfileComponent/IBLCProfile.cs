@@ -18,6 +18,8 @@ namespace BLC.ProfileComponent
         void DQ_GetUserAccount_TPVALIDSET_ExtraFields();
         void DQ_GetUserAccount_Add_Codes_ExtraFields();
         void RemoveFirstRows();
+        public void RemoveFirstRowPersons();
         string[] ExtractEngFullValues();
+        string SortingDS();
     }
 }

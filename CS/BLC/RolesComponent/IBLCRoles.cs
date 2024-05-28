@@ -12,6 +12,7 @@ namespace BLC.RolesComponent
     public interface IBLCRoles
     {
         public string DQ_CheckRoles(CredentialsDto credentials);
+        public string SetRole(string sessionId, string roleId);
         public void DQ_GetUserAccount_Add_Codes_ExtraFields();
     }
 }
