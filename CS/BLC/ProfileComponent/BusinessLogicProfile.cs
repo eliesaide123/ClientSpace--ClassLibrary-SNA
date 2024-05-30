@@ -9,7 +9,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+ 
 namespace BLC.ProfileComponent
 {
     public class BusinessLogicProfile: IBLCProfile
@@ -58,6 +58,67 @@ namespace BLC.ProfileComponent
             return JsonConvert.SerializeObject(new { userAccount, questions });
         }
 
+        public void DQ_GetUserAccount_TPIDENT_ExtraFields()
+        {
+            DataTable dataTable = new DataTable("TPIDENT");
+
+            // Add columns to the DataTable
+            dataTable.Columns.Add("TP-UserId", typeof(string));
+            dataTable.Columns.Add("TP-Mobile", typeof(string));
+            dataTable.Columns.Add("TP-UserName", typeof(string));
+            dataTable.Columns.Add("TP-Email", typeof(string));
+            dataTable.Columns.Add("TP-UserLang", typeof(string));
+            dataTable.Columns.Add("TP-ContactScenario", typeof(string));
+            dataTable.Columns.Add("TP-Pwd", typeof(string));
+            dataTable.Columns.Add("TP-RegType", typeof(string));
+
+            // Add a row with values
+            DataRow row = dataTable.NewRow();
+            row["TP-UserId"] = string.Empty;
+            row["TP-Mobile"] = string.Empty;
+            row["TP-UserName"] = string.Empty;
+            row["TP-Email"] = string.Empty;
+            row["TP-UserLang"] = string.Empty;
+            row["TP-ContactScenario"] = string.Empty;
+            row["TP-Pwd"] = string.Empty;
+            row["TP-RegType"] = string.Empty;
+            dataTable.Rows.Add(row);
+            GlobalOperatorDS.Tables.Add(dataTable);
+        }
+
+        public void DQ_GetUserAccount_TPVALIDSET_ExtraFields()
+        {
+            DataTable dataTable = new DataTable("TPVALIDSET");
+
+            // Add columns to the DataTable
+            dataTable.Columns.Add("TP-Question", typeof(string));
+            dataTable.Columns.Add("TP-Answer", typeof(string));
+
+            // Add rows with the desired fields
+            DataRow row = dataTable.NewRow();
+            row["TP-Question"] = "";
+            row["TP-Answer"] = "";
+            dataTable.Rows.Add(row);
+            GlobalOperatorDS.Tables.Add(dataTable);
+        }
+
+        public void DQ_GetUserAccount_Add_Codes_ExtraFields()
+        {
+            DataTable dataTable = new DataTable("Codes");
+
+            // Add columns to the DataTable
+            dataTable.Columns.Add("Tbl_Name", typeof(string));
+            dataTable.Columns.Add("Code", typeof(string));
+            dataTable.Columns.Add("Eng_Full", typeof(string));
+
+            DataRow row = dataTable.NewRow();
+            row["Tbl_Name"] = "";
+            row["Code"] = "";
+            row["Eng_Full"] = "";
+            dataTable.Rows.Add(row);
+            GlobalOperatorDS.Tables.Add(dataTable);
+        }
+
         public string DQ_GetClientInfo(string sessionId, string roleId)
         {
             GlobalOperatorDS.Tables.Clear();
@@ -94,24 +155,6 @@ namespace BLC.ProfileComponent
             var jsonResponse = SortingDS();
             return jsonResponse;
         }
-
-        //public string GetPortfolio (int sessionId, string roleId)
-        //{
-        //    GlobalOperatorDS.Tables.Clear();
-        //    List<DQParam> Params = new List<DQParam>();
-        //    Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetPortfolio" });
-        //    Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetPortfolio" });
-        //    Params.Add(new DQParam() { Name = "CATEGORY", Value = "-ALL-", Type = "Q" });
-        //    Params.Add(new DQParam() { Name = "PRODUCT", Value = "-ALL-", Type = "Q" });
-        //    Params.Add(new DQParam() { Name = "INFORCEONLY", Value = true.ToString(), Type = "Q" });
-        //    Params.Add(new DQParam() { Name = "POLICYNO", Value = "", Type = "Q" });
-        //Me.DQ_AddParam("POLICYNO", Me.m_PolicyNo, "Q")
-        //Me.DQ_AddParam("PAGING_DIRECTION", "", "O")
-        //Me.DQ_AddParam("PAGING_START_INDEX", i__StartIndex, "O")
-        //Me.DQ_AddParam("PAGING_PAGE_SIZE", Me.DQ_GetConfigEntry("GRID_PAGE_SIZE"), "Q")
-        //Me.DQ_AddParam("PAGING_ACTION", i__Action, "Q")
-        //Me.DQ_AddParam("HolderLabel", "", "O")
-        //}
 
         public void DQ_GetClientInfo_ExtraFields_Persons()
         {
@@ -202,65 +245,108 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS.Tables.Add(codesTable);
         }
 
-        public void DQ_GetUserAccount_TPIDENT_ExtraFields()
+
+        public string GetPortfolio(string sessionId, int gridSize, string direction, string roleId)
         {
-            DataTable dataTable = new DataTable("TPIDENT");
+            GlobalOperatorDS.Tables.Clear();
+            List<DQParam> Params = new List<DQParam>();
+            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetPortfolio" });
+            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetPortfolio" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "CATEGORY", Value = "-ALL-", Type = "Q" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "PRODUCT", Value = "-ALL-", Type = "Q" });
+            Params.Add(new DQParam() { Name = "INFORCEONLY", Value = true.ToString(), Type = "Q" });
+            Params.Add(new DQParam() { Name = "POLICYNO", Value = "", Type = "Q" });
+            Params.Add(new DQParam() { Name = "PAGING_DIRECTION", Value = "", Type = "O" });
+            Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = 0.ToString(), Type = "O" });
+            Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = gridSize.ToString(), Type = "Q" });
+            Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = direction, Type = "O" });
+            Params.Add(new DQParam() { Name = "HolderLabel", Value = "", Type = "O" });
 
-            // Add columns to the DataTable
-            dataTable.Columns.Add("TP-UserId", typeof(string));
-            dataTable.Columns.Add("TP-Mobile", typeof(string));
-            dataTable.Columns.Add("TP-UserName", typeof(string));
-            dataTable.Columns.Add("TP-Email", typeof(string));
-            dataTable.Columns.Add("TP-UserLang", typeof(string));
-            dataTable.Columns.Add("TP-ContactScenario", typeof(string));
-            dataTable.Columns.Add("TP-Pwd", typeof(string));
-            dataTable.Columns.Add("TP-RegType", typeof(string));
+            DQ_GetPortfolio_ExtraFields_Polcom();
 
-            // Add a row with values
-            DataRow row = dataTable.NewRow();
-            row["TP-UserId"] = string.Empty;
-            row["TP-Mobile"] = string.Empty;
-            row["TP-UserName"] = string.Empty;
-            row["TP-Email"] = string.Empty;
-            row["TP-UserLang"] = string.Empty;
-            row["TP-ContactScenario"] = string.Empty;
-            row["TP-Pwd"] = string.Empty;
-            row["TP-RegType"] = string.Empty;
-            dataTable.Rows.Add(row);
-            GlobalOperatorDS.Tables.Add(dataTable);
+            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+
+            var formattedData = TransformDataToJson();
+
+            return formattedData;
         }
 
-        public void DQ_GetUserAccount_TPVALIDSET_ExtraFields()
+        public string TransformDataToJson()
         {
-            DataTable dataTable = new DataTable("TPVALIDSET");
+            DataTable dataTable = GlobalOperatorDS.Tables["Polcom"];
+            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
 
-            // Add columns to the DataTable
-            dataTable.Columns.Add("TP-Question", typeof(string));
-            dataTable.Columns.Add("TP-Answer", typeof(string));
+            foreach (DataRow row in dataTable.Rows)
+            {
+                Dictionary<string, object> rowDict = new Dictionary<string, object>();
+                foreach (DataColumn column in dataTable.Columns)
+                {
+                    rowDict[column.ColumnName] = row[column];
+                }
+                rows.Add(rowDict);
+            }
 
-            // Add rows with the desired fields
-            DataRow row = dataTable.NewRow();
-            row["TP-Question"] = "";
-            row["TP-Answer"] = "";
-            dataTable.Rows.Add(row);
-            GlobalOperatorDS.Tables.Add(dataTable);
+            var result = new Dictionary<string, object>
+        {
+            { dataTable.TableName, rows }
+        };
+
+            return JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
         }
 
-        public void DQ_GetUserAccount_Add_Codes_ExtraFields()
+        public void DQ_GetPortfolio_ExtraFields_Polcom()
         {
-            DataTable dataTable = new DataTable("Codes");
+            DataTable dataTable = new DataTable("Polcom");
 
-            // Add columns to the DataTable
-            dataTable.Columns.Add("Tbl_Name", typeof(string));
-            dataTable.Columns.Add("Code", typeof(string));
-            dataTable.Columns.Add("Eng_Full", typeof(string));
+            // Step 2: Define the columns
+            dataTable.Columns.Add("Pol_serno", typeof(Int32));
+            dataTable.Columns.Add("PolicyType", typeof(String));
+            dataTable.Columns.Add("PolicyNo", typeof(String));
+            dataTable.Columns.Add("ProductName", typeof(String));
+            dataTable.Columns.Add("HolderName", typeof(String));
+            dataTable.Columns.Add("Inception", typeof(DateTime));
+            dataTable.Columns.Add("Expiry", typeof(DateTime));
+            dataTable.Columns.Add("Status_Code", typeof(String));
+            dataTable.Columns.Add("OrderBy", typeof(Int32));
+            dataTable.Columns.Add("CertNo", typeof(Int32));
+            dataTable.Columns.Add("pay_frq", typeof(String));
+            dataTable.Columns.Add("Total_Premium", typeof(Decimal));
+            dataTable.Columns.Add("Cur_Code", typeof(String));
+            dataTable.Columns.Add("Tabs", typeof(String));
+            dataTable.Columns.Add("Template", typeof(String));
+            dataTable.Columns.Add("AsAgreed", typeof(String));
+            dataTable.Columns.Add("HasRequest", typeof(Boolean));
+            dataTable.Columns.Add("HasFresh", typeof(Boolean));
+            dataTable.Columns.Add("Disable_View", typeof(Boolean));
+            dataTable.Columns.Add("OpenCover", typeof(Boolean));
+            dataTable.Columns.Add("CONVERT_DATA", typeof(String));
 
-            DataRow row = dataTable.NewRow();
-            row["Tbl_Name"] = "";
-            row["Code"] = "";
-            row["Eng_Full"] = "";
-            dataTable.Rows.Add(row);
-            GlobalOperatorDS.Tables.Add(dataTable);
+            DataRow defaultRow = dataTable.NewRow();
+            foreach (DataColumn column in dataTable.Columns)
+            {
+                switch (column.DataType)
+                {
+                    case Type t when t == typeof(String):
+                        defaultRow[column.ColumnName] = String.Empty;
+                        break;
+                    case Type t when t == typeof(int) || t == typeof(Int32):
+                        defaultRow[column.ColumnName] = 0; // Default value for int
+                        break;
+                    case Type t when t == typeof(Boolean):
+                        defaultRow[column.ColumnName] = false; // Default value for bool
+                        break;
+                    case Type t when t == typeof(Decimal):
+                        defaultRow[column.ColumnName] = new Decimal(0);
+                        break;
+                    case Type t when t == typeof(DateTime):
+                        defaultRow[column.ColumnName] = new DateTime();
+                        break;
+                }
+            }
+                dataTable.Rows.Add(defaultRow);
+                GlobalOperatorDS.Tables.Add(dataTable);
         }
 
         public void RemoveFirstRows()
