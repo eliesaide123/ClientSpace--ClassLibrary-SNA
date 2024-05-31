@@ -24,6 +24,7 @@
     </Reference>
     <Reference Include="DQOperator">
       <HintPath>..\..\..\DQOperator\bin\Debug\DQOperator.dll</HintPath>
+      <HintPath>bin\Debug\net8.0\DQBasePage.dll</HintPath>
     </Reference>
   </ItemGroup>
 
