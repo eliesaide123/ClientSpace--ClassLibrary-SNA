@@ -91,12 +91,12 @@ namespace BLC.LoginComponent
         {
             NameValueCollection oServerResponse = new NameValueCollection();
 
-            if (credentials.IsAuthenticated)
+            if (credentials.IsAuthenticated == true)
             {
                 _sessionManager.SetSessionValue("DQ_SessionID", credentials.SessionID);
                 _sessionManager.SetSessionValue("DQ_IsLoggedIn", "true");
 
-                if (credentials.IsFirstLogin)
+                if (credentials.IsFirstLogin == true)
                 {
                     //if statement to check company name
                     oServerResponse.Add("ENTRY|STATUS", "2");

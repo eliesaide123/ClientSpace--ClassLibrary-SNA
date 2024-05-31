@@ -119,14 +119,14 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS.Tables.Add(dataTable);
         }
 
-        public string DQ_GetClientInfo(string sessionId, string roleId)
+        public string DQ_GetClientInfo(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
 
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetClientInfo", Type = "" });
-            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
             Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
             Params.Add(new DQParam() { Name = "OnlineSales", Value = "", Type = "O" });
             Params.Add(new DQParam() { Name = "OnlineAgt", Value = "", Type = "O" });
@@ -246,22 +246,22 @@ namespace BLC.ProfileComponent
         }
 
 
-        public string GetPortfolio(string sessionId, int gridSize, string direction, string roleId)
+        public string GetPortfolio(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetPortfolio" });
             Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetPortfolio" });
-            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
             Params.Add(new DQParam() { Name = "CATEGORY", Value = "-ALL-", Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
             Params.Add(new DQParam() { Name = "PRODUCT", Value = "-ALL-", Type = "Q" });
             Params.Add(new DQParam() { Name = "INFORCEONLY", Value = true.ToString(), Type = "Q" });
             Params.Add(new DQParam() { Name = "POLICYNO", Value = "", Type = "Q" });
             Params.Add(new DQParam() { Name = "PAGING_DIRECTION", Value = "", Type = "O" });
-            Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = 0.ToString(), Type = "O" });
-            Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = gridSize.ToString(), Type = "Q" });
-            Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = direction, Type = "O" });
+            Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = parameters.StartIndex.ToString(), Type = "O" });
+            Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = parameters.GridSize.ToString(), Type = "Q" });
+            Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = parameters.Direction, Type = "O" });
             Params.Add(new DQParam() { Name = "HolderLabel", Value = "", Type = "O" });
 
             DQ_GetPortfolio_ExtraFields_Polcom();
