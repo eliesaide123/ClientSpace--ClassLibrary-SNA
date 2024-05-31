@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Entities;
 
 namespace BLC
 {
-    public interface IBLC
+    public interface ISessionManager
     {
-        void GetSession(string sessionId);
-        CredentialsDto Authenticate(CredentialsDto credentials);
+        void SetSessionValue(string key, string value);
+        string GetSessionValue(string key);
     }
 }
