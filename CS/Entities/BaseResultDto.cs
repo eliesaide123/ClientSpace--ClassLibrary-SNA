@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Entities
 {
     public class BaseResultDto
     {
-        public string? SessionID { get; set; }
         public List<ErrorDescriptor>? Errors { get; set; }
     }
 

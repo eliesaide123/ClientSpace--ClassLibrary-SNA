@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Entities.IActionResponseDTOs
 {
-    public class CheckRolesResponse : BaseResultDto
+    public class GetPortfolioResponse
     {
-        public bool? Error { get; set; }
-        public cUserIdent? SUCCESS { get; set; }
+        public List<PolcomPortfolioDto>? Polcom { get;set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BLC.Service;
 using Entities;
+using Entities.IActionResponseDTOs;
 using Entities.JSONResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -246,7 +247,7 @@ namespace BLC.ProfileComponent
         }
 
 
-        public string GetPortfolio(DoOpMainParams parameters)
+        public GetPortfolioResponse GetPortfolio(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
@@ -268,9 +269,14 @@ namespace BLC.ProfileComponent
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
-            var formattedData = CommonFunctions.TransformDataToJson("Polcom", GlobalOperatorDS);
+            var formattedData = CommonFunctions.GetListFromData<PolcomPortfolioDto>("Polcom", GlobalOperatorDS);
 
-            return formattedData;
+            var sendData = new GetPortfolioResponse()
+            {
+                Polcom = formattedData,
+            };
+            
+            return sendData;
         }
 
         public void DQ_GetPortfolio_ExtraFields_Polcom()
@@ -289,15 +295,15 @@ namespace BLC.ProfileComponent
             dataTable.Columns.Add("OrderBy", typeof(Int32));
             dataTable.Columns.Add("CertNo", typeof(Int32));
             dataTable.Columns.Add("pay_frq", typeof(String));
-            dataTable.Columns.Add("Total_Premium", typeof(Decimal));
+            dataTable.Columns.Add("Total_Premium", typeof(decimal));
             dataTable.Columns.Add("Cur_Code", typeof(String));
             dataTable.Columns.Add("Tabs", typeof(String));
             dataTable.Columns.Add("Template", typeof(String));
             dataTable.Columns.Add("AsAgreed", typeof(String));
-            dataTable.Columns.Add("HasRequest", typeof(Boolean));
-            dataTable.Columns.Add("HasFresh", typeof(Boolean));
-            dataTable.Columns.Add("Disable_View", typeof(Boolean));
-            dataTable.Columns.Add("OpenCover", typeof(Boolean));
+            dataTable.Columns.Add("HasRequest", typeof(bool));
+            dataTable.Columns.Add("HasFresh", typeof(bool));
+            dataTable.Columns.Add("Disable_View", typeof(bool));
+            dataTable.Columns.Add("OpenCover", typeof(bool));
             dataTable.Columns.Add("CONVERT_DATA", typeof(String));
 
             DataRow defaultRow = dataTable.NewRow();

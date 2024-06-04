@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Entities.IActionResponseDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace BLC.ProfileComponent
     {
         string DQ_GetUserAccount(CredentialsDto credentials);
         public string DQ_GetClientInfo(DoOpMainParams parameters);
-        string GetPortfolio(DoOpMainParams parameters);
+        GetPortfolioResponse GetPortfolio(DoOpMainParams parameters);
         public void DQ_GetClientInfo_ExtraFields_Codes();
         public void DQ_GetHolderProduct_ExtraFields_Product();
         public void DQ_GetClientInfo_ExtraFields_Persons();

@@ -12,6 +12,7 @@ using System.Net;
 using Newtonsoft.Json;
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using Entities.IActionResponseDTOs;
 
 namespace BLC.LoginComponent
 {
@@ -87,7 +88,7 @@ namespace BLC.LoginComponent
             };
         }
 
-        public Dictionary<string, string> IsFirstLogin(CredentialsDto credentials)
+        public LoginUserResponse IsFirstLogin(CredentialsDto credentials)
         {
             NameValueCollection oServerResponse = new NameValueCollection();
 
@@ -115,7 +116,20 @@ namespace BLC.LoginComponent
             oServerResponse.Add("ERROR|ERROR", DQ_GetBusinessErrorMessage());
             oServerResponse.Add("FLASH|FLASH", DQ_GetBusinessFlashMessage());
 
-            return oServerResponse.AllKeys.ToDictionary(key => key, key => oServerResponse[key]);
+            var errors = oServerResponse.AllKeys.ToDictionary(key => key, key => oServerResponse[key]);
+            var user = new ResponseCredentialsDto()
+            {
+                Username = credentials.Username,
+                Password = credentials.Password,
+                ClientType = credentials.ClientType,
+                IsAuthenticated = credentials.IsAuthenticated,
+                IsFirstLogin = credentials.IsFirstLogin
+            };
+            return new LoginUserResponse()
+            {
+                Credentials = user,
+                Errors = errors
+            };
         }
 
         public string DQ_GetBusinessErrorMessage()

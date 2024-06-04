@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Entities.IActionResponseDTOs
 {
-    public class CheckRolesResponse : BaseResultDto
+    public class GetPolicyDetailsResponse
     {
-        public bool? Error { get; set; }
-        public cUserIdent? SUCCESS { get; set; }
+        public List<PolcomPolicyDetailsDto>? Polcom { get;set; }
+        public List<CodesPolicyDetailsDto>? Codes { get;set; }
     }
 }

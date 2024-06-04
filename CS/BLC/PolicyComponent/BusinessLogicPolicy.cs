@@ -1,5 +1,6 @@
 ﻿using BLC.Service;
 using Entities;
+using Entities.IActionResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -24,7 +25,7 @@ namespace BLC.PolicyComponent
             _sessionManager = new SessionManager(httpContextAccessor);
         }
 
-        public string DQ_GetPIPolicyDetails(DoOpMainParams parameters)
+        public GetPolicyDetailsResponse DQ_GetPIPolicyDetails(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
@@ -41,11 +42,12 @@ namespace BLC.PolicyComponent
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
-            var RES_Polcom = CommonFunctions.TransformDataToJson("Polcom", GlobalOperatorDS);
-            var RES_Codes = CommonFunctions.TransformDataToJson("Codes", GlobalOperatorDS);
+            var RES_Polcom = CommonFunctions.GetListFromData<PolcomPolicyDetailsDto>("Polcom", GlobalOperatorDS);
+            var RES_Codes = CommonFunctions.GetListFromData<CodesPolicyDetailsDto>("Codes", GlobalOperatorDS);
 
+            var sendResponse = new GetPolicyDetailsResponse() { Polcom = RES_Polcom, Codes = RES_Codes };
 
-            return JsonConvert.SerializeObject(new { RES_Polcom, RES_Codes });
+            return sendResponse;
         }
 
         public void DQ_GetPIPolicyDetails_ExtraFields()

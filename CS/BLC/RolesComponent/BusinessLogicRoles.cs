@@ -62,11 +62,19 @@ namespace BLC.RolesComponent
                         oUserIdent.LoggedDate = DateTime.Now.ToShortDateString();
 
                         _sessionManager.SetSessionValue("DQUserIdent", JsonConvert.SerializeObject(oUserIdent));
-                        return JsonConvert.SerializeObject(oUserIdent);
+                        checkRolesResponse.Error = false;
+                        checkRolesResponse.SUCCESS = oUserIdent;
+                        return JsonConvert.SerializeObject(checkRolesResponse);
                     }
                 }
+                else
+                {
+                    checkRolesResponse.Error = true;
+                    checkRolesResponse.Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS);
+                    return JsonConvert.SerializeObject(checkRolesResponse);
+                }
             }
-            return JsonConvert.SerializeObject(false);
+            return JsonConvert.SerializeObject(new CheckRolesResponse() { Error = true});
         }
 
         public void SetRole(string sessionId, string roleId)

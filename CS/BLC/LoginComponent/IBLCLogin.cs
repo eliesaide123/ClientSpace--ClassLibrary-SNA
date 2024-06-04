@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entities;
+using Entities.IActionResponseDTOs;
 
 namespace BLC.LoginComponent
 {
@@ -12,6 +13,7 @@ namespace BLC.LoginComponent
     {
         void GetSession(string sessionId);
         CredentialsDto Authenticate(CredentialsDto credentials);
+        LoginUserResponse IsFirstLogin(CredentialsDto credentials);
 
         public string DQ_GetBusinessErrorMessage();
 

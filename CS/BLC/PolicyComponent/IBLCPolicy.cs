@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Entities.IActionResponseDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace BLC.PolicyComponent
 {
     public interface IBLCPolicy
     {
-        string DQ_GetPIPolicyDetails(DoOpMainParams parameters);
+        GetPolicyDetailsResponse DQ_GetPIPolicyDetails(DoOpMainParams parameters);
         void DQ_GetPIPolicyDetails_ExtraFields();
         void DQ_GetPIPolicyDetails_Codes_ExtraFields();
     }
