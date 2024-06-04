@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities
 {
-    public class Person
+    public class Person: BaseResultDto
     {
         public Int32 PIN { get; set; }
         public string? Age { get; set; }

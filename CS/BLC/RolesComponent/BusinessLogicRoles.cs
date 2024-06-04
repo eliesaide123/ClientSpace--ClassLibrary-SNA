@@ -1,5 +1,6 @@
 ﻿using BLC.Service;
 using Entities;
+using Entities.IActionResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -40,14 +41,18 @@ namespace BLC.RolesComponent
 
             if (this.GlobalOperatorDS != null)
             {
+                var checkRolesResponse = new CheckRolesResponse();
+
+                //if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+                //{
+                //    var errors = CommonFunctions.TransformDataToDictionary("NOTIFICATION", GlobalOperatorDS);
+                //    checkRolesResponse.Error = true;
+                //    //checkRolesResponse.NOTIFICATION = CommonFunctions.CreateNotificationDto(errors);
+                //    return JsonConvert.SerializeObject(checkRolesResponse);
+                //}
                 if (this.GlobalOperatorDS.Tables["UserIdent"] != null)
                 {
-                    if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
-                    {
-                        return JsonConvert.SerializeObject(false);
-                    }
-
-                        if (this.GlobalOperatorDS.Tables["UserIdent"].Rows.Count == 1)
+                    if (this.GlobalOperatorDS.Tables["UserIdent"].Rows.Count == 1)
                     {
                         var oUserIdent = new cUserIdent();
                         oUserIdent.UserName = this.GlobalOperatorDS.Tables["UserIdent"].Rows[0]["FullName"].ToString();
@@ -57,14 +62,22 @@ namespace BLC.RolesComponent
                         oUserIdent.LoggedDate = DateTime.Now.ToShortDateString();
 
                         _sessionManager.SetSessionValue("DQUserIdent", JsonConvert.SerializeObject(oUserIdent));
-                        return JsonConvert.SerializeObject(JsonConvert.SerializeObject(oUserIdent));
+                        checkRolesResponse.Error = false;
+                        checkRolesResponse.SUCCESS = oUserIdent;
+                        return JsonConvert.SerializeObject(checkRolesResponse);
                     }
                 }
+                else
+                {
+                    checkRolesResponse.Error = true;
+                    checkRolesResponse.Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS);
+                    return JsonConvert.SerializeObject(checkRolesResponse);
+                }
             }
-            return JsonConvert.SerializeObject(false);
+            return JsonConvert.SerializeObject(new CheckRolesResponse() { Error = true});
         }
 
-        public string SetRole(string sessionId, string roleId)
+        public void SetRole(string sessionId, string roleId)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
@@ -88,7 +101,6 @@ namespace BLC.RolesComponent
             GlobalOperatorDS.Tables.Add(dt);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
-            return string.Empty;
         }
 
         public void DQ_GetUserAccount_Add_Codes_ExtraFields()

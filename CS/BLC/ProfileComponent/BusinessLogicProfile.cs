@@ -1,6 +1,6 @@
 ﻿using BLC.Service;
 using Entities;
-using Entities.JSONResponseDTOs;
+using Entities.IActionResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -23,7 +23,7 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
         }
-        public string DQ_GetUserAccount(CredentialsDto credentials)
+        public GetUserAccountResponse DQ_GetUserAccount(CredentialsDto credentials)
         {
             GlobalOperatorDS.Tables.Clear();
 
@@ -55,7 +55,7 @@ namespace BLC.ProfileComponent
 
             string[] questions = ExtractEngFullValues();
 
-            return JsonConvert.SerializeObject(new { userAccount, questions });
+            return new GetUserAccountResponse() { UserAccount = userAccount, Questions = questions };
         }
 
         public void DQ_GetUserAccount_TPIDENT_ExtraFields()
@@ -119,14 +119,14 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS.Tables.Add(dataTable);
         }
 
-        public string DQ_GetClientInfo(string sessionId, string roleId)
+        public GetClientInfoResponse DQ_GetClientInfo(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
 
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetClientInfo", Type = "" });
-            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
             Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
             Params.Add(new DQParam() { Name = "OnlineSales", Value = "", Type = "O" });
             Params.Add(new DQParam() { Name = "OnlineAgt", Value = "", Type = "O" });
@@ -152,8 +152,10 @@ namespace BLC.ProfileComponent
             //    Session["AgtCode"] = DQ_GetParameter("AgtCode");
             //}
 
-            var jsonResponse = SortingDS();
-            return jsonResponse;
+            var person = SortingDS();
+            var codes = CommonFunctions.GetListFromData<CodesClientInfoDto>("Codes", GlobalOperatorDS);
+            var products = CommonFunctions.GetListFromData<ProductClientnfoDto>("Product", GlobalOperatorDS);
+            return new GetClientInfoResponse() { Person = person, Products = products, Codes = codes};
         }
 
         public void DQ_GetClientInfo_ExtraFields_Persons()
@@ -246,54 +248,36 @@ namespace BLC.ProfileComponent
         }
 
 
-        public string GetPortfolio(string sessionId, int gridSize, string direction, string roleId)
+        public GetPortfolioResponse GetPortfolio(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "GetPortfolio" });
             Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_GetPortfolio" });
-            Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
             Params.Add(new DQParam() { Name = "CATEGORY", Value = "-ALL-", Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type = "Q" });
+            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
             Params.Add(new DQParam() { Name = "PRODUCT", Value = "-ALL-", Type = "Q" });
             Params.Add(new DQParam() { Name = "INFORCEONLY", Value = true.ToString(), Type = "Q" });
             Params.Add(new DQParam() { Name = "POLICYNO", Value = "", Type = "Q" });
             Params.Add(new DQParam() { Name = "PAGING_DIRECTION", Value = "", Type = "O" });
-            Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = 0.ToString(), Type = "O" });
-            Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = gridSize.ToString(), Type = "Q" });
-            Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = direction, Type = "O" });
+            Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = parameters.StartIndex.ToString(), Type = "O" });
+            Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = parameters.GridSize.ToString(), Type = "Q" });
+            Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = parameters.Direction, Type = "O" });
             Params.Add(new DQParam() { Name = "HolderLabel", Value = "", Type = "O" });
 
             DQ_GetPortfolio_ExtraFields_Polcom();
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
-            var formattedData = TransformDataToJson();
+            var formattedData = CommonFunctions.GetListFromData<PolcomPortfolioDto>("Polcom", GlobalOperatorDS);
 
-            return formattedData;
-        }
-
-        public string TransformDataToJson()
-        {
-            DataTable dataTable = GlobalOperatorDS.Tables["Polcom"];
-            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
-
-            foreach (DataRow row in dataTable.Rows)
+            var sendData = new GetPortfolioResponse()
             {
-                Dictionary<string, object> rowDict = new Dictionary<string, object>();
-                foreach (DataColumn column in dataTable.Columns)
-                {
-                    rowDict[column.ColumnName] = row[column];
-                }
-                rows.Add(rowDict);
-            }
+                Polcom = formattedData,
+            };
 
-            var result = new Dictionary<string, object>
-        {
-            { dataTable.TableName, rows }
-        };
-
-            return JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
+            return sendData;
         }
 
         public void DQ_GetPortfolio_ExtraFields_Polcom()
@@ -312,15 +296,15 @@ namespace BLC.ProfileComponent
             dataTable.Columns.Add("OrderBy", typeof(Int32));
             dataTable.Columns.Add("CertNo", typeof(Int32));
             dataTable.Columns.Add("pay_frq", typeof(String));
-            dataTable.Columns.Add("Total_Premium", typeof(Decimal));
+            dataTable.Columns.Add("Total_Premium", typeof(decimal));
             dataTable.Columns.Add("Cur_Code", typeof(String));
             dataTable.Columns.Add("Tabs", typeof(String));
             dataTable.Columns.Add("Template", typeof(String));
             dataTable.Columns.Add("AsAgreed", typeof(String));
-            dataTable.Columns.Add("HasRequest", typeof(Boolean));
-            dataTable.Columns.Add("HasFresh", typeof(Boolean));
-            dataTable.Columns.Add("Disable_View", typeof(Boolean));
-            dataTable.Columns.Add("OpenCover", typeof(Boolean));
+            dataTable.Columns.Add("HasRequest", typeof(bool));
+            dataTable.Columns.Add("HasFresh", typeof(bool));
+            dataTable.Columns.Add("Disable_View", typeof(bool));
+            dataTable.Columns.Add("OpenCover", typeof(bool));
             dataTable.Columns.Add("CONVERT_DATA", typeof(String));
 
             DataRow defaultRow = dataTable.NewRow();
@@ -385,7 +369,7 @@ namespace BLC.ProfileComponent
             return query.ToArray();
         }
 
-        public string SortingDS()
+        public Person SortingDS()
         {
             DataRow row = GlobalOperatorDS.Tables["Persons"].Rows[0];
             var person = new Person()
@@ -419,34 +403,7 @@ namespace BLC.ProfileComponent
                 CONVERT_DATA = row["CONVERT_DATA"]?.ToString() ?? string.Empty,
             };
 
-            var products = DataTableToArray("Product");
-            var codes = DataTableToArray("Codes");
-
-            var jsonToSend = new GetClientInfoResponseDto()
-            {
-                Person = person,
-                Products = products,
-                Codes = codes
-            };
-
-            return JsonConvert.SerializeObject(jsonToSend);
-        }
-
-        public string[][] DataTableToArray(string TableName)
-        {
-            int rowCount = GlobalOperatorDS.Tables[TableName].Rows.Count;
-            int columnCount = GlobalOperatorDS.Tables[TableName].Columns.Count;
-            string[][] result = new string[rowCount][];
-
-            for (int i = 0; i < rowCount; i++)
-            {
-                result[i] = new string[columnCount];
-                for (int j = 0; j < columnCount; j++)
-                {
-                    result[i][j] = GlobalOperatorDS.Tables[TableName].Rows[i][j].ToString();
-                }
-            }
-            return result;
+            return person;
         }
     }
 }

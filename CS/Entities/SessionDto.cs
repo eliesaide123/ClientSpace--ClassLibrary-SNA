@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities
 {
-    public class SessionDto
+    public interface SessionDto
     {
         public string? SessionID { get; set; }
     }

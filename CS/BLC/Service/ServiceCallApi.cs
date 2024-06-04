@@ -92,8 +92,8 @@ namespace BLC.Service
                 // Create a combined object to hold both serialized objects
                 var bodyContent = new
                 {
-                    operatorDS = operatorDSJson,
-                    paramString = paramJson
+                    OperatorDS = operatorDSJson,
+                    Params = paramJson
                 };
 
                 // Serialize the combined object to JSON

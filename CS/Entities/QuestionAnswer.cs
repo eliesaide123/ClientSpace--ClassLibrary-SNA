@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities
 {
-    public class QuestionAnswer
+    public class QuestionAnswer: BaseResultDto
     {
         public string? Question { get; set; }
         public string? Answer { get; set; }

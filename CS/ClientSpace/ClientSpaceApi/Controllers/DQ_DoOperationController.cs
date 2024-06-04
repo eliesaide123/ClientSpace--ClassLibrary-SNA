@@ -1,4 +1,5 @@
 ﻿using ClientSpaceApi.Classes;
+using ClientSpaceApi.Models;
 using DQOperator;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,13 +16,13 @@ namespace ClientSpaceApi.Controllers
     public class DQ_DoOperationController : ApiController
     {
         [HttpPost]
-        public async Task<IHttpActionResult> DQ_Operation([FromBody] dynamic data)
+        public async Task<IHttpActionResult> DQ_Operation([FromBody] DQOperationParams data)
         {
             try
             {
                 // Extract the properties from the dynamic object
-                var operatorDSJson = data.operatorDS.ToString();
-                var paramString = data.paramString.ToString();
+                var operatorDSJson = data.OperatorDS.ToString();
+                var paramString = data.Params.ToString();
 
                 var dataSetJson = JObject.Parse(operatorDSJson);
 
