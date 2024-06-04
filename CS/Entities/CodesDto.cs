@@ -19,6 +19,11 @@ namespace Entities
     //    public string? Repl_With { get; set; }    
     //}
 
+    public class CodesClientInfoDto
+    {
+        public string? Code { get; set; }
+        public string? Eng_Full { get; set; }
+    }
     public class CodesPolicyDetailsDto
     {
         public string? Tbl_Name { get; set; }

@@ -1,7 +1,6 @@
 ﻿using BLC.Service;
 using Entities;
 using Entities.IActionResponseDTOs;
-using Entities.JSONResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
@@ -24,7 +23,7 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
         }
-        public string DQ_GetUserAccount(CredentialsDto credentials)
+        public GetUserAccountResponse DQ_GetUserAccount(CredentialsDto credentials)
         {
             GlobalOperatorDS.Tables.Clear();
 
@@ -56,7 +55,7 @@ namespace BLC.ProfileComponent
 
             string[] questions = ExtractEngFullValues();
 
-            return JsonConvert.SerializeObject(new { userAccount, questions });
+            return new GetUserAccountResponse() { UserAccount = userAccount, Questions = questions };
         }
 
         public void DQ_GetUserAccount_TPIDENT_ExtraFields()
@@ -120,7 +119,7 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS.Tables.Add(dataTable);
         }
 
-        public string DQ_GetClientInfo(DoOpMainParams parameters)
+        public GetClientInfoResponse DQ_GetClientInfo(DoOpMainParams parameters)
         {
             GlobalOperatorDS.Tables.Clear();
 
@@ -153,8 +152,10 @@ namespace BLC.ProfileComponent
             //    Session["AgtCode"] = DQ_GetParameter("AgtCode");
             //}
 
-            var jsonResponse = SortingDS();
-            return jsonResponse;
+            var person = SortingDS();
+            var codes = CommonFunctions.GetListFromData<CodesClientInfoDto>("Codes", GlobalOperatorDS);
+            var products = CommonFunctions.GetListFromData<ProductClientnfoDto>("Product", GlobalOperatorDS);
+            return new GetClientInfoResponse() { Person = person, Products = products, Codes = codes};
         }
 
         public void DQ_GetClientInfo_ExtraFields_Persons()
@@ -275,7 +276,7 @@ namespace BLC.ProfileComponent
             {
                 Polcom = formattedData,
             };
-            
+
             return sendData;
         }
 
@@ -368,7 +369,7 @@ namespace BLC.ProfileComponent
             return query.ToArray();
         }
 
-        public string SortingDS()
+        public Person SortingDS()
         {
             DataRow row = GlobalOperatorDS.Tables["Persons"].Rows[0];
             var person = new Person()
@@ -402,34 +403,7 @@ namespace BLC.ProfileComponent
                 CONVERT_DATA = row["CONVERT_DATA"]?.ToString() ?? string.Empty,
             };
 
-            var products = DataTableToArray("Product");
-            var codes = DataTableToArray("Codes");
-
-            var jsonToSend = new GetClientInfoResponseDto()
-            {
-                Person = person,
-                Products = products,
-                Codes = codes
-            };
-
-            return JsonConvert.SerializeObject(jsonToSend);
-        }
-
-        public string[][] DataTableToArray(string TableName)
-        {
-            int rowCount = GlobalOperatorDS.Tables[TableName].Rows.Count;
-            int columnCount = GlobalOperatorDS.Tables[TableName].Columns.Count;
-            string[][] result = new string[rowCount][];
-
-            for (int i = 0; i < rowCount; i++)
-            {
-                result[i] = new string[columnCount];
-                for (int j = 0; j < columnCount; j++)
-                {
-                    result[i][j] = GlobalOperatorDS.Tables[TableName].Rows[i][j].ToString();
-                }
-            }
-            return result;
+            return person;
         }
     }
 }
