@@ -268,32 +268,9 @@ namespace BLC.ProfileComponent
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
-            var formattedData = TransformDataToJson();
+            var formattedData = CommonFunctions.TransformDataToJson("Polcom", GlobalOperatorDS);
 
             return formattedData;
-        }
-
-        public string TransformDataToJson()
-        {
-            DataTable dataTable = GlobalOperatorDS.Tables["Polcom"];
-            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
-
-            foreach (DataRow row in dataTable.Rows)
-            {
-                Dictionary<string, object> rowDict = new Dictionary<string, object>();
-                foreach (DataColumn column in dataTable.Columns)
-                {
-                    rowDict[column.ColumnName] = row[column];
-                }
-                rows.Add(rowDict);
-            }
-
-            var result = new Dictionary<string, object>
-        {
-            { dataTable.TableName, rows }
-        };
-
-            return JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
         }
 
         public void DQ_GetPortfolio_ExtraFields_Polcom()

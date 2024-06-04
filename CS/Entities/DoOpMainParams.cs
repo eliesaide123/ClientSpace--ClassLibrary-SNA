@@ -13,5 +13,6 @@ namespace Entities
         public int? GridSize { get; set; }
         public string? Direction { get; set; }
         public int? StartIndex { get; set; }
+        public Int32? PolSerNo { get; set; }
     }
 }

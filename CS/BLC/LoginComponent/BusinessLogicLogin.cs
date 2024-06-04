@@ -87,7 +87,7 @@ namespace BLC.LoginComponent
             };
         }
 
-        public NameValueCollection IsFirstLogin(CredentialsDto credentials)
+        public Dictionary<string, string> IsFirstLogin(CredentialsDto credentials)
         {
             NameValueCollection oServerResponse = new NameValueCollection();
 
@@ -115,7 +115,7 @@ namespace BLC.LoginComponent
             oServerResponse.Add("ERROR|ERROR", DQ_GetBusinessErrorMessage());
             oServerResponse.Add("FLASH|FLASH", DQ_GetBusinessFlashMessage());
 
-            return oServerResponse;
+            return oServerResponse.AllKeys.ToDictionary(key => key, key => oServerResponse[key]);
         }
 
         public string DQ_GetBusinessErrorMessage()

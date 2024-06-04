@@ -8,7 +8,7 @@ namespace Entities.JSONResponseDTOs
 {
     public class GetUserAccountResponse
     {
-        public UserAccount UserAccount { get; set; }
-        public string[] Questions {  get; set; }
+        public UserAccount? UserAccount { get; set; }
+        public string[]? Questions {  get; set; }
     }
 }

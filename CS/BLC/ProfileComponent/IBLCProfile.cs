@@ -19,7 +19,6 @@ namespace BLC.ProfileComponent
         void DQ_GetUserAccount_TPVALIDSET_ExtraFields();
         void DQ_GetUserAccount_Add_Codes_ExtraFields();
         void DQ_GetPortfolio_ExtraFields_Polcom();
-        string TransformDataToJson();
         void RemoveFirstRows();
         public void RemoveFirstRowPersons();
         string[] ExtractEngFullValues();
