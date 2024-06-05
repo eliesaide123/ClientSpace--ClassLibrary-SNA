@@ -8,7 +8,7 @@ namespace Entities.IActionResponseDTOs
 {
     public class LoginUserResponse
     {
-        public ResponseCredentialsDto? Credentials { get; set; }
+        public CredentialsDto? Credentials { get; set; }
         public Dictionary<string, string>? Errors { get; set; }
     }
 }
