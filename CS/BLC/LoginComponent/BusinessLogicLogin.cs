@@ -117,13 +117,14 @@ namespace BLC.LoginComponent
             oServerResponse.Add("FLASH|FLASH", DQ_GetBusinessFlashMessage());
 
             var errors = oServerResponse.AllKeys.ToDictionary(key => key, key => oServerResponse[key]);
-            var user = new ResponseCredentialsDto()
+            var user = new CredentialsDto()
             {
                 Username = credentials.Username,
                 Password = credentials.Password,
                 ClientType = credentials.ClientType,
                 IsAuthenticated = credentials.IsAuthenticated,
-                IsFirstLogin = credentials.IsFirstLogin
+                IsFirstLogin = credentials.IsFirstLogin,
+                SessionID = credentials.SessionID,
             };
             return new LoginUserResponse()
             {
