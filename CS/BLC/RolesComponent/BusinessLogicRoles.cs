@@ -58,6 +58,7 @@ namespace BLC.RolesComponent
                         oUserIdent.UserName = this.GlobalOperatorDS.Tables["UserIdent"].Rows[0]["FullName"].ToString();
                         oUserIdent.Pin = this.GlobalOperatorDS.Tables["UserIdent"].Rows[0]["Pin"].ToString();
                         oUserIdent.Role = this.GlobalOperatorDS.Tables["UserIdent"].Rows[0]["Role"].ToString();
+                        oUserIdent.RoleID = this.GlobalOperatorDS.Tables["Codes"].Rows[0]["Code"].ToString().Split("-")[0];
                         oUserIdent.Language = this.GlobalOperatorDS.Tables["UserIdent"].Rows[0]["Language"].ToString();
                         oUserIdent.LoggedDate = DateTime.Now.ToShortDateString();
 
