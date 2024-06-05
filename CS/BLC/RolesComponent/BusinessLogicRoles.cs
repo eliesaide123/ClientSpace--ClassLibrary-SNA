@@ -25,7 +25,7 @@ namespace BLC.RolesComponent
             _sessionManager = new SessionManager(httpContextAccessor);
         }
 
-        public string DQ_CheckRoles(CredentialsDto credentials)
+        public CheckRolesResponse DQ_CheckRoles(CredentialsDto credentials)
         {
             GlobalOperatorDS.Tables.Clear();
             List<DQParam> Params = new List<DQParam>();
@@ -65,17 +65,17 @@ namespace BLC.RolesComponent
                         _sessionManager.SetSessionValue("DQUserIdent", JsonConvert.SerializeObject(oUserIdent));
                         checkRolesResponse.Error = false;
                         checkRolesResponse.SUCCESS = oUserIdent;
-                        return JsonConvert.SerializeObject(checkRolesResponse);
+                        return checkRolesResponse;
                     }
                 }
                 else
                 {
                     checkRolesResponse.Error = true;
                     checkRolesResponse.Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS);
-                    return JsonConvert.SerializeObject(checkRolesResponse);
+                    return checkRolesResponse;
                 }
             }
-            return JsonConvert.SerializeObject(new CheckRolesResponse() { Error = true});
+            return new CheckRolesResponse() { Error = true};
         }
 
         public void SetRole(string sessionId, string roleId)

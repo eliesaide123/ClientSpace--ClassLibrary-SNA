@@ -1,4 +1,5 @@
 ﻿using Entities;
+using Entities.IActionResponseDTOs;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace BLC.RolesComponent
 {
     public interface IBLCRoles
     {
-        public string DQ_CheckRoles(CredentialsDto credentials);
+        public CheckRolesResponse DQ_CheckRoles(CredentialsDto credentials);
         public void SetRole(string sessionId, string roleId);
         public void DQ_GetUserAccount_Add_Codes_ExtraFields();
     }
