@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BLC.Service;
 using Entities;
-using System.Data;
-using System.Collections.Specialized;
-using BLC.Service;
-using RestSharp;
-using System.Net;
-using Newtonsoft.Json;
-using System.Web;
-using Microsoft.AspNetCore.Http;
 using Entities.IActionResponseDTOs;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Data;
+using RestSharp;
+using System.Text;
 
 namespace BLC.LoginComponent
 {
@@ -21,11 +15,16 @@ namespace BLC.LoginComponent
         private readonly ServiceCallApi _callApi;
         public DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
+        private readonly string jsonPath;
         public BusinessLogicLogin(IHttpContextAccessor httpContextAccessor)
         {
             _callApi = new ServiceCallApi();
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
+            if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
+            {
+                jsonPath = ConfigurationManager.AppSettings["jsonFilePath"];
+            }
         }
         public async void GetSession(string sessionId)
         {
@@ -39,22 +38,14 @@ namespace BLC.LoginComponent
         public CredentialsDto Authenticate(CredentialsDto credentials)
         {
             GlobalOperatorDS.Tables.Clear();
-            List<DQParam> Params = new List<DQParam>();
-            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQWebAuthentication", Type = "" });
-            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "Conv_DQWebAuthentication", Type = "" });
+            var taskName = "DQWebAuthentication";
+            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
 
             // Add your logic to create and populate the DataSet
-            DataTable credentialsTable = new DataTable("Credentials");
-            credentialsTable.Columns.Add("User_ID", typeof(string));
-            credentialsTable.Columns.Add("Password", typeof(string));
-            credentialsTable.Columns.Add("ClientType", typeof(string));
-            credentialsTable.Columns.Add("SessionID", typeof(string));
-            credentialsTable.Columns.Add("IsAuthenticated", typeof(bool));
-            credentialsTable.Columns.Add("StationNo", typeof(string));
-            credentialsTable.Columns.Add("IsFirstLogin", typeof(bool));
+            DataTable tbl_Credentials = CommonFunctions.GetTableColumns(jsonPath, taskName, "Credentials");
 
-            DataRow row = credentialsTable.NewRow();
+            DataRow row = tbl_Credentials.NewRow();
             row["User_ID"] = credentials.Username;
             row["Password"] = credentials.Password;
             row["ClientType"] = credentials.ClientType;
@@ -62,8 +53,8 @@ namespace BLC.LoginComponent
             row["IsAuthenticated"] = credentials.IsAuthenticated;
             row["IsFirstLogin"] = credentials.IsFirstLogin;
 
-            credentialsTable.Rows.Add(row);
-            GlobalOperatorDS.Tables.Add(credentialsTable);
+            tbl_Credentials.Rows.Add(row);
+            GlobalOperatorDS.Tables.Add(tbl_Credentials);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 

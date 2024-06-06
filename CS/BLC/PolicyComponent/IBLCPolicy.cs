@@ -11,7 +11,5 @@ namespace BLC.PolicyComponent
     public interface IBLCPolicy
     {
         GetPolicyDetailsResponse DQ_GetPIPolicyDetails(DoOpMainParams parameters);
-        void DQ_GetPIPolicyDetails_ExtraFields();
-        void DQ_GetPIPolicyDetails_Codes_ExtraFields();
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Net;
@@ -18,24 +19,27 @@ namespace BLC.RolesComponent
         private readonly ServiceCallApi _callApi;
         public DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
+        private readonly string jsonPath;
         public BusinessLogicRoles(IHttpContextAccessor httpContextAccessor)
         {
             _callApi = new ServiceCallApi();
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
+            if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
+            {
+                jsonPath = ConfigurationManager.AppSettings["jsonFilePath"];
+            }
         }
 
         public CheckRolesResponse DQ_CheckRoles(CredentialsDto credentials)
         {
             GlobalOperatorDS.Tables.Clear();
-            List<DQParam> Params = new List<DQParam>();
-            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "CheckRoles", Type = "" });
+            var taskName = "CheckRoles";
+            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
-            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = "MR" });
-            Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
 
-            DQ_GetUserAccount_Add_Codes_ExtraFields();
+            DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
+            CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
@@ -81,44 +85,15 @@ namespace BLC.RolesComponent
         public void SetRole(string sessionId, string roleId)
         {
             GlobalOperatorDS.Tables.Clear();
-            List<DQParam> Params = new List<DQParam>();
-            Params.Add(new DQParam() { Name = "TASK_NAME", Value = "SetRoles", Type = "" });
+            var taskName = "SetRoles";
+            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
-            Params.Add(new DQParam() { Name = "CONVERTER_NAME", Value = "" });
             Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type="Q" });
-            Params.Add(new DQParam() { Name = "PAGE_MODE", Value = "REAL" });
 
-            DataTable dt = new DataTable("VARIABLES");
-            dt.Columns.Add("ATTRIBUTE", typeof(string));
-            dt.Columns.Add("STR_VALUE", typeof(string));
-            dt.Columns.Add("VAL_FORMAT", typeof(string));
-            dt.Columns.Add("VAR_TYPE", typeof(string));
-            DataRow row = dt.NewRow();
-            row["ATTRIBUTE"] = "";
-            row["STR_VALUE"] = "";
-            row["VAL_FORMAT"] = "";
-            row["VAR_TYPE"] = "";
-            dt.Rows.Add(row);
-            GlobalOperatorDS.Tables.Add(dt);
+            DataTable tbl_VARIABLES = CommonFunctions.GetTableColumns(jsonPath, taskName, "VARIABLES");
+            CommonFunctions.DefaultRow(ref tbl_VARIABLES, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
-        }
-
-        public void DQ_GetUserAccount_Add_Codes_ExtraFields()
-        {
-            DataTable dataTable = new DataTable("Codes");
-
-            // Add columns to the DataTable
-            dataTable.Columns.Add("Tbl_Name", typeof(string));
-            dataTable.Columns.Add("Code", typeof(string));
-            dataTable.Columns.Add("Eng_Full", typeof(string));
-
-            DataRow row = dataTable.NewRow();
-            row["Tbl_Name"] = "";
-            row["Code"] = "";
-            row["Eng_Full"] = "";
-            dataTable.Rows.Add(row);
-            GlobalOperatorDS.Tables.Add(dataTable);
         }
 
     }

@@ -14,6 +14,5 @@ namespace BLC.RolesComponent
     {
         public CheckRolesResponse DQ_CheckRoles(CredentialsDto credentials);
         public void SetRole(string sessionId, string roleId);
-        public void DQ_GetUserAccount_Add_Codes_ExtraFields();
     }
 }
