@@ -47,6 +47,14 @@ namespace BLC.PolicyComponent
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
+            if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            {
+                return new GetPolicyDetailsResponse()
+                {
+                    Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)
+                };
+            }
+
             var RES_Polcom = CommonFunctions.GetListFromData<PolcomPolicyDetailsDto>("Polcom", GlobalOperatorDS);
             var RES_Codes = CommonFunctions.GetListFromData<CodesPolicyDetailsDto>("Codes", GlobalOperatorDS);
 

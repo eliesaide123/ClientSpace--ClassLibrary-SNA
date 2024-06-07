@@ -12,7 +12,7 @@ namespace Entities
     //    public string? Prod_Desc { get; set; }
     //}
 
-    public class ProductClientnfoDto
+    public class ProductClientInfoDto
     {
         public string? Product { get; set; }
         public string? Prod_Desc { get; set; }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Entities
 {
-    public class CredentialsDto : BaseResultDto, SessionDto
+    public class CredentialsDto: BaseResultDto, SessionDto
     {
         public string? Username { get; set; } = string.Empty;
         public string? Password { get; set; } = string.Empty;
@@ -18,7 +18,7 @@ namespace Entities
         public string? SessionID { get; set; }
     }
 
-    public class ResponseCredentialsDto : BaseResultDto
+    public class ResponseCredentialsDto
     {
         public string? Username { get; set; } = string.Empty;
         public string? Password { get; set; } = string.Empty;

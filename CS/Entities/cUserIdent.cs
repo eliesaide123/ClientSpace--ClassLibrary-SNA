@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities
 {
-    public class cUserIdent:BaseResultDto
+    public class cUserIdent
     {
         #region Properties
         public string? UserName { get; set; }

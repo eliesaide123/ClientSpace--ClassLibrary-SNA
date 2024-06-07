@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities.IActionResponseDTOs
 {
-    public class GetPolicyDetailsResponse
+    public class GetPolicyDetailsResponse : BaseResultDto
     {
         public List<PolcomPolicyDetailsDto>? Polcom { get;set; }
         public List<CodesPolicyDetailsDto>? Codes { get;set; }

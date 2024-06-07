@@ -47,6 +47,11 @@ namespace BLC.ProfileComponent
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
             RemoveFirstRows();
 
+            if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            {
+                return new GetUserAccountResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)};
+            }
+
             var userAccount = new UserAccount()
             {
                 Username = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-UserId"].ToString(),
@@ -84,6 +89,11 @@ namespace BLC.ProfileComponent
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
             RemoveFirstRowPersons();
 
+            if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            {
+                return new GetClientInfoResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)};
+            }
+
             //_sessionManager.SetSessionValue("DQ_OnlineSales", ""); //DQ_GetParameter("OnlineSales");
 
             //if (!string.IsNullOrEmpty(DQ_GetParameter("OnlineAgt")))
@@ -98,7 +108,7 @@ namespace BLC.ProfileComponent
 
             var person = SortingDS();
             var codes = CommonFunctions.GetListFromData<CodesClientInfoDto>("Codes", GlobalOperatorDS);
-            var products = CommonFunctions.GetListFromData<ProductClientnfoDto>("Product", GlobalOperatorDS);
+            var products = CommonFunctions.GetListFromData<ProductClientInfoDto>("Product", GlobalOperatorDS);
             return new GetClientInfoResponse() { Person = person, Products = products, Codes = codes};
         }
 
@@ -118,6 +128,14 @@ namespace BLC.ProfileComponent
             CommonFunctions.DefaultRow(ref tbl_Polcom, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+
+            if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            {
+                return new GetPortfolioResponse()
+                {
+                    Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)
+                };
+            }
 
             var formattedData = CommonFunctions.GetListFromData<PolcomPortfolioDto>("Polcom", GlobalOperatorDS);
 

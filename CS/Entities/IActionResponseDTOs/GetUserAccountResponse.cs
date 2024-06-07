@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities.IActionResponseDTOs
 {
-    public class GetUserAccountResponse
+    public class GetUserAccountResponse : BaseResultDto
     {
         public UserAccount? UserAccount { get; set; }
         public string[]? Questions { get; set; }
