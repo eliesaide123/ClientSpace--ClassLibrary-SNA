@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -124,7 +125,7 @@ namespace BLC
 
             return result;
         }
-        public static List<DQParam> GetTaskParams(string jsonFilePath, string taskName)
+        public static List<DQParam> GetTaskParams(string jsonFilePath, string taskName,DoOpMainParams? doOpParams)
         {
             using (StreamReader sr = new StreamReader(jsonFilePath))
             using (JsonTextReader reader = new JsonTextReader(sr))
@@ -172,7 +173,10 @@ namespace BLC
                                             }
                                         }
                                     }
-
+                                    if(param.Value.ToLower().Contains("fill") && (param.Type == "Q" || param.Type == "O"))
+                                    {
+                                        param.Value = doOpParams.GetType().GetProperty(param.Value.Split("_")[1]).GetValue(doOpParams).ToString();
+                                    }
                                     paramsList.Add(param);
                                 }
                             }
@@ -180,11 +184,13 @@ namespace BLC
                         break; // Exit loop after finding the params for the specified task
                     }
                 }
-
+                if (doOpParams != null) {
+                    paramsList.Add(new DQParam() { Name = "SessionID", Value = doOpParams.Credentials.SessionID, Type = "Q" });
+                }
                 return paramsList;
             }
         }
-        public static DataTable GetTableColumns(string jsonFilePath, string taskName, string tableName)
+        public static void GetTableColumns(string jsonFilePath, string taskName, string tableName, ref DataSet GlobalOperatorDS)
         {
             List<Dictionary<string, string>> tableColumns = new List<Dictionary<string, string>>();
 
@@ -212,7 +218,7 @@ namespace BLC
                     if (tables == null)
                     {
                         Console.WriteLine($"Tables not found for task '{taskName}'.");
-                        return new DataTable(tableName);
+                        return;
                     }
 
                     // Search for the specified table name within the tables object
@@ -220,7 +226,7 @@ namespace BLC
                     if (tableProperty == null)
                     {
                         Console.WriteLine($"Table '{tableName}' not found in task '{taskName}'.");
-                        return new DataTable(tableName);
+                        return;
                     }
 
                     // Convert the table to a list of dictionaries
@@ -240,9 +246,58 @@ namespace BLC
                 table.Columns.Add(item["ColumnName"], Type.GetType(item["ColumnDataType"]));
             }
 
-            return table;
+            GlobalOperatorDS.Tables.Add(table);
         }
-        public static void DefaultRow(ref DataTable dt, ref DataSet GlobalOperatorDS)
+        public static DataSet GetTables(string jsonFilePath, string taskName)
+        {
+            DataSet dataSet = new DataSet(taskName);
+
+            try
+            {
+                using (StreamReader file = File.OpenText(jsonFilePath))
+                using (JsonTextReader reader = new JsonTextReader(file))
+                {
+                    JObject jsonObject = JObject.Load(reader);
+                    JToken taskToken = jsonObject.SelectToken($"$.TASKS.{taskName}");
+
+                    if (taskToken == null)
+                    {
+                        Console.WriteLine($"Task '{taskName}' not found in JSON file.");
+                        return dataSet;
+                    }
+
+                    JToken tablesToken = taskToken["Tables"];
+                    if (tablesToken == null || tablesToken.Type != JTokenType.Object)
+                    {
+                        Console.WriteLine($"No tables found for task '{taskName}'.");
+                        return dataSet;
+                    }
+
+                    foreach (JProperty tableProperty in tablesToken.Children<JProperty>())
+                    {
+                        string tableName = tableProperty.Name;
+                        JArray columnsArray = tableProperty.Value as JArray;
+
+                        Console.WriteLine($"Processing table: {tableName}");
+
+                        if (string.IsNullOrEmpty(tableName) || columnsArray == null)
+                        {
+                            Console.WriteLine("Invalid table or columns data.");
+                            continue;
+                        }
+
+                        GetTableColumns(jsonFilePath, taskName, tableName, ref dataSet);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while processing the JSON file: {ex.Message}");
+            }
+
+            return dataSet;
+        }
+        public static void DefaultRow(DataTable dt)
         {
             DataRow defaultRow = dt.NewRow();
             foreach (DataColumn column in dt.Columns)
@@ -267,7 +322,38 @@ namespace BLC
                 }
             }
             dt.Rows.Add(defaultRow);
-            GlobalOperatorDS.Tables.Add(dt);
+        }
+
+        public static void ConstructTask(DoOpMainParams doOpParams, string jsonPath, string taskName, ref List<DQParam> Params, ref DataSet GlobalOperatorDS)
+        {
+
+            Params = GetTaskParams(jsonPath, taskName, doOpParams);
+
+            GlobalOperatorDS = GetTables(jsonPath, taskName);
+
+            foreach (DataTable table in GlobalOperatorDS.Tables)
+            {
+                var name = table.TableName;
+
+                switch (name)
+                {
+                    case "Credentials":
+                        DataRow row = table.NewRow();
+                        row["User_ID"] = doOpParams.Credentials.Username;
+                        row["Password"] = doOpParams.Credentials.Password;
+                        row["ClientType"] = doOpParams.Credentials.ClientType;
+                        row["SessionID"] = doOpParams.Credentials.SessionID;
+                        row["IsAuthenticated"] = doOpParams.Credentials.IsAuthenticated;
+                        row["IsFirstLogin"] = doOpParams.Credentials.IsFirstLogin;
+
+                        table.Rows.Add(row);
+                        break;
+                    default:
+                        DefaultRow(table);
+                        break;
+                }
+            }
+
         }
     }
 }

@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Entities.IActionResponseDTOs
 {
-    public class LoginUserResponse
+    public class LoginUserResponse: BaseResultDto
     {
         public CredentialsDto? Credentials { get; set; }
-        public Dictionary<string, string>? Errors { get; set; }
     }
 }

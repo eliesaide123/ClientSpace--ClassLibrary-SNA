@@ -34,22 +34,27 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS.Tables.Clear();
 
             var taskName = "GetUserAccount";
-            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
-            Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
+            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
+            List<DQParam> Params = new List<DQParam>();
+            //Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
 
-            DataTable tbl_TPIDENT = CommonFunctions.GetTableColumns(jsonPath, taskName, "TPIDENT");
-            CommonFunctions.DefaultRow(ref tbl_TPIDENT, ref GlobalOperatorDS);
-            DataTable tbl_TPVALIDSET = CommonFunctions.GetTableColumns(jsonPath, taskName, "TPVALIDSET");
-            CommonFunctions.DefaultRow(ref tbl_TPVALIDSET, ref GlobalOperatorDS);
-            DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
-            CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
+            //DataTable tbl_TPIDENT = CommonFunctions.GetTableColumns(jsonPath, taskName, "TPIDENT");
+            //CommonFunctions.DefaultRow(ref tbl_TPIDENT, ref GlobalOperatorDS);
+            //DataTable tbl_TPVALIDSET = CommonFunctions.GetTableColumns(jsonPath, taskName, "TPVALIDSET");
+            //CommonFunctions.DefaultRow(ref tbl_TPVALIDSET, ref GlobalOperatorDS);
+            //DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
+            //CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
+
+            var doOpParams = new DoOpMainParams() { Credentials = credentials};
+
+            CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
             RemoveFirstRows();
 
             if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
             {
-                return new GetUserAccountResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)};
+                return new GetUserAccountResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS) };
             }
 
             var userAccount = new UserAccount()
@@ -75,23 +80,26 @@ namespace BLC.ProfileComponent
             GlobalOperatorDS.Tables.Clear();
 
             var taskName = "GetClientInfo";
-            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
-            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
+            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
+            List<DQParam> Params = new List<DQParam>();
+            //Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
+            //Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
 
-            DataTable tbl_Persons = CommonFunctions.GetTableColumns(jsonPath, taskName, "Persons");
-            CommonFunctions.DefaultRow(ref tbl_Persons, ref GlobalOperatorDS);
-            DataTable tbl_Product = CommonFunctions.GetTableColumns(jsonPath, taskName, "Product");
-            CommonFunctions.DefaultRow(ref tbl_Product, ref GlobalOperatorDS);
-            DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
-            CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
+            //DataTable tbl_Persons = CommonFunctions.GetTableColumns(jsonPath, taskName, "Persons");
+            //CommonFunctions.DefaultRow(ref tbl_Persons, ref GlobalOperatorDS);
+            //DataTable tbl_Product = CommonFunctions.GetTableColumns(jsonPath, taskName, "Product");
+            //CommonFunctions.DefaultRow(ref tbl_Product, ref GlobalOperatorDS);
+            //DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
+            //CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
+
+            CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
             RemoveFirstRowPersons();
 
             if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
             {
-                return new GetClientInfoResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)};
+                return new GetClientInfoResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS) };
             }
 
             //_sessionManager.SetSessionValue("DQ_OnlineSales", ""); //DQ_GetParameter("OnlineSales");
@@ -109,7 +117,7 @@ namespace BLC.ProfileComponent
             var person = SortingDS();
             var codes = CommonFunctions.GetListFromData<CodesClientInfoDto>("Codes", GlobalOperatorDS);
             var products = CommonFunctions.GetListFromData<ProductClientInfoDto>("Product", GlobalOperatorDS);
-            return new GetClientInfoResponse() { Person = person, Products = products, Codes = codes};
+            return new GetClientInfoResponse() { Person = person, Products = products, Codes = codes };
         }
 
 
@@ -117,15 +125,18 @@ namespace BLC.ProfileComponent
         {
             GlobalOperatorDS.Tables.Clear();
             var taskName = "GetPortfolio";
-            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
-            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
-            Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = parameters.StartIndex.ToString(), Type = "O" });
-            Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = parameters.GridSize.ToString(), Type = "Q" });
-            Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = parameters.Direction, Type = "O" });
+            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
+            List<DQParam> Params = new List<DQParam>();
+            //Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
+            //Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
+            //Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = parameters.StartIndex.ToString(), Type = "O" });
+            //Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = parameters.GridSize.ToString(), Type = "Q" });
+            //Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = parameters.Direction, Type = "O" });
 
-            DataTable tbl_Polcom = CommonFunctions.GetTableColumns(jsonPath, taskName, "Polcom");
-            CommonFunctions.DefaultRow(ref tbl_Polcom, ref GlobalOperatorDS);
+            //DataTable tbl_Polcom = CommonFunctions.GetTableColumns(jsonPath, taskName, "Polcom");
+            //CommonFunctions.DefaultRow(ref tbl_Polcom, ref GlobalOperatorDS);
+
+            CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 

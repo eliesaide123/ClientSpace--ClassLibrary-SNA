@@ -35,15 +35,19 @@ namespace BLC.PolicyComponent
         {
             GlobalOperatorDS.Tables.Clear();
             var taskName = "GetPIPolicyDetails";
-            List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
-            Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
-            Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
-            Params.Add(new DQParam() { Name = "PolSerNo", Value = parameters.PolSerNo.ToString(), Type = "O" });
+            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
+            List<DQParam> Params = new List<DQParam>();
+            //Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
+            //Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
+            //Params.Add(new DQParam() { Name = "PolSerNo", Value = parameters.PolSerNo.ToString(), Type = "O" });
 
-            DataTable tbl_Polcom = CommonFunctions.GetTableColumns(jsonPath, taskName, "Polcom");
-            CommonFunctions.DefaultRow(ref tbl_Polcom, ref GlobalOperatorDS);
-            DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
-            CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
+            //DataTable tbl_Polcom = CommonFunctions.GetTableColumns(jsonPath, taskName, "Polcom");
+            //CommonFunctions.DefaultRow(ref tbl_Polcom, ref GlobalOperatorDS);
+            //DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
+            //CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
+
+            CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
+
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 

@@ -12,7 +12,6 @@ namespace BLC.LoginComponent
     public interface IBLCLogin
     {
         void GetSession(string sessionId);
-        CredentialsDto Authenticate(CredentialsDto credentials);
-        LoginUserResponse IsFirstLogin(CredentialsDto credentials);
+        LoginUserResponse Authenticate(CredentialsDto credentials);
     }
 }
