@@ -18,7 +18,7 @@ namespace BLC.RolesComponent
     public class BusinessLogicRoles : IBLCRoles
     {
         private readonly ServiceCallApi _callApi;
-        public DataSet GlobalOperatorDS;
+        private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
         private readonly string jsonPath;
         private readonly IMapper _mapper;
@@ -36,7 +36,7 @@ namespace BLC.RolesComponent
 
         public CheckRolesResponse DQ_CheckRoles(CredentialsDto credentials)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
             var taskName = "CheckRoles";
             List<DQParam> Params = new List<DQParam>();
            
@@ -74,7 +74,7 @@ namespace BLC.RolesComponent
 
         public void SetRole(string sessionId, string roleId)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
             var taskName = "SetRoles";
             //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();

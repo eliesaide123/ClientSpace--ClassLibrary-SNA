@@ -17,7 +17,7 @@ namespace BLC.PolicyComponent
     public class BusinessLogicPolicy : IBLCPolicy
     {
         private readonly ServiceCallApi _callApi;
-        public DataSet GlobalOperatorDS;
+        private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
         private readonly string jsonPath;
         public BusinessLogicPolicy(IHttpContextAccessor httpContextAccessor)
@@ -33,7 +33,7 @@ namespace BLC.PolicyComponent
 
         public GetPolicyDetailsResponse DQ_GetPIPolicyDetails(DoOpMainParams parameters)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
             var taskName = "GetPIPolicyDetails";
             //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();

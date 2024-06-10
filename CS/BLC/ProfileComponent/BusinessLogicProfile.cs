@@ -16,13 +16,12 @@ namespace BLC.ProfileComponent
     public class BusinessLogicProfile : IBLCProfile
     {
         private readonly ServiceCallApi _callApi;
-        public DataSet GlobalOperatorDS;
+        private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
         private readonly string jsonPath;
         public BusinessLogicProfile(IHttpContextAccessor httpContextAccessor)
         {
             _callApi = new ServiceCallApi();
-            GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
             if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
             {
@@ -31,20 +30,11 @@ namespace BLC.ProfileComponent
         }
         public GetUserAccountResponse DQ_GetUserAccount(CredentialsDto credentials)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
 
             var taskName = "GetUserAccount";
-            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();
-            //Params.Add(new DQParam() { Name = "SessionID", Value = credentials.SessionID, Type = "Q" });
-
-            //DataTable tbl_TPIDENT = CommonFunctions.GetTableColumns(jsonPath, taskName, "TPIDENT");
-            //CommonFunctions.DefaultRow(ref tbl_TPIDENT, ref GlobalOperatorDS);
-            //DataTable tbl_TPVALIDSET = CommonFunctions.GetTableColumns(jsonPath, taskName, "TPVALIDSET");
-            //CommonFunctions.DefaultRow(ref tbl_TPVALIDSET, ref GlobalOperatorDS);
-            //DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
-            //CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
-
+            
             var doOpParams = new DoOpMainParams() { Credentials = credentials};
 
             CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
@@ -77,7 +67,7 @@ namespace BLC.ProfileComponent
 
         public GetClientInfoResponse DQ_GetClientInfo(DoOpMainParams parameters)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
 
             var taskName = "GetClientInfo";
             //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
@@ -123,7 +113,7 @@ namespace BLC.ProfileComponent
 
         public GetPortfolioResponse DQ_GetPortfolio(DoOpMainParams parameters)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
             var taskName = "GetPortfolio";
             //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();

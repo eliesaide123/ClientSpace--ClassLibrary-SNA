@@ -14,7 +14,7 @@ namespace BLC.LoginComponent
     public class BusinessLogicLogin : IBLCLogin
     {
         private readonly ServiceCallApi _callApi;
-        public DataSet GlobalOperatorDS;
+        private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
         private readonly string jsonPath;
         private readonly IMapper _mapper;
@@ -31,7 +31,7 @@ namespace BLC.LoginComponent
         }
         public async void GetSession(string sessionId)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
             List<DQParam> Params = new List<DQParam>();
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQNewSession", Type = "" });
             Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "" });
@@ -40,7 +40,7 @@ namespace BLC.LoginComponent
         }
         public LoginUserResponse Authenticate(CredentialsDto credentials)
         {
-            GlobalOperatorDS.Tables.Clear();
+            this.GlobalOperatorDS = new DataSet();
             var taskName = "DQWebAuthentication";
             
             List<DQParam> Params = new List<DQParam>();
