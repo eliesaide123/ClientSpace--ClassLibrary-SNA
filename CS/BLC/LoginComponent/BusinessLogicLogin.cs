@@ -73,7 +73,7 @@ namespace BLC.LoginComponent
 
             return new LoginUserResponse()
             {
-                Credentials = _mapper.Map<DataTable, CredentialsDto>(GlobalOperatorDS.Tables["Credentials"])
+                Credentials = _mapper.Map<DataSet, CredentialsDto>(GlobalOperatorDS)
             };
         }
     }

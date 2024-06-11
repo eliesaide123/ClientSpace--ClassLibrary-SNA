@@ -53,8 +53,8 @@ namespace BLC.RolesComponent
                 {
                     if (this.GlobalOperatorDS.Tables["UserIdent"].Rows.Count == 1)
                     {
-                        var oUserIdent = _mapper.Map<DataTable, cUserIdent>(GlobalOperatorDS.Tables["UserIdent"]);
-                        oUserIdent.RoleID = GlobalOperatorDS.Tables["Codes"].Rows[0]["Code"].ToString().Split("-")[0];
+                        var oUserIdent = _mapper.Map<DataSet, cUserIdent>(GlobalOperatorDS);
+                        //oUserIdent.RoleID = GlobalOperatorDS.Tables["Codes"].Rows[0]["Code"].ToString().Split("-")[0];
 
                         _sessionManager.SetSessionValue("DQUserIdent", JsonConvert.SerializeObject(oUserIdent));
                         checkRolesResponse.Error = false;
