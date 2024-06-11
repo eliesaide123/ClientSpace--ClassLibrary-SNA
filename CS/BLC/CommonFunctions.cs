@@ -354,7 +354,6 @@ namespace BLC
             }
 
         }
-
         public static Dictionary<string, string> GetOutputParams(ref DataSet GlobalOperatorDS)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
