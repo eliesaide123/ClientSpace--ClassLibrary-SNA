@@ -1,4 +1,5 @@
-﻿using BLC.Service;
+﻿using AutoMapper;
+using BLC.Service;
 using Entities;
 using Entities.IActionResponseDTOs;
 using Microsoft.AspNetCore.Http;
@@ -18,11 +19,13 @@ namespace BLC.ProfileComponent
         private readonly ServiceCallApi _callApi;
         private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
+        private readonly IMapper _mapper;
         private readonly string jsonPath;
-        public BusinessLogicProfile(IHttpContextAccessor httpContextAccessor)
+        public BusinessLogicProfile(IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
             _callApi = new ServiceCallApi();
             _sessionManager = new SessionManager(httpContextAccessor);
+            _mapper = mapper;
             if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
             {
                 jsonPath = ConfigurationManager.AppSettings["jsonFilePath"];
@@ -46,23 +49,7 @@ namespace BLC.ProfileComponent
             {
                 return new GetUserAccountResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS) };
             }
-
-            var userAccount = new UserAccount()
-            {
-                Username = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-UserId"].ToString(),
-                Password = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-Pwd"].ToString(),
-                Email = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-Email"].ToString(),
-                Mobile = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-Mobile"].ToString(),
-                UserLang = Convert.ToInt32(GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-UserLang"]),
-                ContactScenario = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-ContactScenario"].ToString(),
-                RegType = GlobalOperatorDS.Tables["TPIDENT"].Rows[0]["TP-RegType"].ToString(),
-                Question = GlobalOperatorDS.Tables["TPVALIDSET"].Rows[0]["TP-Question"].ToString(),
-                Answer = GlobalOperatorDS.Tables["TPVALIDSET"].Rows[0]["TP-Answer"].ToString(),
-            };
-
-            string[] questions = ExtractEngFullValues();
-
-            return new GetUserAccountResponse() { UserAccount = userAccount, Questions = questions };
+            return new GetUserAccountResponse() { UserAccount = _mapper.Map<DataSet, UserAccount>(GlobalOperatorDS), Questions = _mapper.Map<DataTable, string[]>(GlobalOperatorDS.Tables["Codes"]) };
         }
 
         public GetClientInfoResponse DQ_GetClientInfo(DoOpMainParams parameters)
@@ -70,18 +57,8 @@ namespace BLC.ProfileComponent
             this.GlobalOperatorDS = new DataSet();
 
             var taskName = "GetClientInfo";
-            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();
-            //Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
-            //Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
-
-            //DataTable tbl_Persons = CommonFunctions.GetTableColumns(jsonPath, taskName, "Persons");
-            //CommonFunctions.DefaultRow(ref tbl_Persons, ref GlobalOperatorDS);
-            //DataTable tbl_Product = CommonFunctions.GetTableColumns(jsonPath, taskName, "Product");
-            //CommonFunctions.DefaultRow(ref tbl_Product, ref GlobalOperatorDS);
-            //DataTable tbl_Codes = CommonFunctions.GetTableColumns(jsonPath, taskName, "Codes");
-            //CommonFunctions.DefaultRow(ref tbl_Codes, ref GlobalOperatorDS);
-
+            
             CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
@@ -92,19 +69,21 @@ namespace BLC.ProfileComponent
                 return new GetClientInfoResponse() { Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS) };
             }
 
-            //_sessionManager.SetSessionValue("DQ_OnlineSales", ""); //DQ_GetParameter("OnlineSales");
+            var outputParams = CommonFunctions.GetOutputParams(ref GlobalOperatorDS);
 
-            //if (!string.IsNullOrEmpty(DQ_GetParameter("OnlineAgt")))
-            //{
-            //    Session["DQ_OnlineAgt"] = DQ_GetParameter("OnlineAgt").Replace("^", "=");
-            //}
+            _sessionManager.SetSessionValue("DQ_OnlineSales", outputParams["OnlineSales"]);
 
-            //if (!string.IsNullOrEmpty(DQ_GetParameter("AgtCode")))
-            //{
-            //    Session["AgtCode"] = DQ_GetParameter("AgtCode");
-            //}
+            if (!string.IsNullOrEmpty(outputParams["OnlineAgt"]))
+            {
+                _sessionManager.SetSessionValue("DQ_OnlineAgt", outputParams["OnlineAgt"].Replace("^", "="));
+            }
 
-            var person = SortingDS();
+            if (!string.IsNullOrEmpty(outputParams["AgtCode"]))
+            {
+                _sessionManager.SetSessionValue("AgtCode", outputParams["AgtCode"]);
+            }
+
+            var person = _mapper.Map<DataSet, Person>(GlobalOperatorDS);
             var codes = CommonFunctions.GetListFromData<CodesClientInfoDto>("Codes", GlobalOperatorDS);
             var products = CommonFunctions.GetListFromData<ProductClientInfoDto>("Product", GlobalOperatorDS);
             return new GetClientInfoResponse() { Person = person, Products = products, Codes = codes };
@@ -115,16 +94,7 @@ namespace BLC.ProfileComponent
         {
             this.GlobalOperatorDS = new DataSet();
             var taskName = "GetPortfolio";
-            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();
-            //Params.Add(new DQParam() { Name = "SessionID", Value = parameters.Credentials.SessionID, Type = "Q" });
-            //Params.Add(new DQParam() { Name = "ROLEID", Value = parameters.RoleID, Type = "Q" });
-            //Params.Add(new DQParam() { Name = "PAGING_START_INDEX", Value = parameters.StartIndex.ToString(), Type = "O" });
-            //Params.Add(new DQParam() { Name = "PAGING_PAGE_SIZE", Value = parameters.GridSize.ToString(), Type = "Q" });
-            //Params.Add(new DQParam() { Name = "PAGING_ACTION", Value = parameters.Direction, Type = "O" });
-
-            //DataTable tbl_Polcom = CommonFunctions.GetTableColumns(jsonPath, taskName, "Polcom");
-            //CommonFunctions.DefaultRow(ref tbl_Polcom, ref GlobalOperatorDS);
 
             CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
@@ -171,54 +141,6 @@ namespace BLC.ProfileComponent
                     table.AcceptChanges();
                 }
             }
-        }
-
-        public string[] ExtractEngFullValues()
-        {
-            // Use LINQ to filter rows where "Tbl_Name" is the specified value and select "Eng_Full"
-            var query = from row in GlobalOperatorDS.Tables["Codes"].AsEnumerable()
-                        where row.Field<string>("Tbl_Name") == "_CSQuestions"
-                        select row.Field<string>("Eng_Full");
-
-            // Convert the result to an array
-            return query.ToArray();
-        }
-
-        public Person SortingDS()
-        {
-            DataRow row = GlobalOperatorDS.Tables["Persons"].Rows[0];
-            var person = new Person()
-            {
-                PIN = row["PIN"]?.ToString() != string.Empty ? Convert.ToInt32(row["PIN"]) : 0,
-                Age = row["Age"]?.ToString() ?? string.Empty,
-                Marital = row["Marital"]?.ToString() ?? string.Empty,
-                Per_Title = row["Per_Title"]?.ToString() ?? string.Empty,
-                FirstName = row["FirstName"]?.ToString() ?? string.Empty,
-                Father = row["Father"]?.ToString() ?? string.Empty,
-                Family = row["Family"]?.ToString() ?? string.Empty,
-                FullName = row["FullName"]?.ToString() ?? string.Empty,
-                Profession = row["Profession"]?.ToString() ?? string.Empty,
-                Address = row["Address"]?.ToString() ?? string.Empty,
-                EntityType = row["EntityType"]?.ToString() ?? string.Empty,
-                DOB_Day = row["DOB_Day"]?.ToString() != string.Empty ? Convert.ToInt32(row["DOB_Day"]) : (int?)null,
-                DOB_Month = row["DOB_Month"]?.ToString() != string.Empty ? Convert.ToInt32(row["DOB_Month"]) : (int?)null,
-                DOB_Year = row["DOB_Year"]?.ToString() != string.Empty ? Convert.ToInt32(row["DOB_Year"]) : (int?)null,
-                HasRequest = row["HasRequest"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasRequest"]) : false,
-                HasUnpaid = row["HasUnpaid"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasUnpaid"]) : false,
-                HasClaims = row["HasClaims"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasClaims"]) : false,
-                HasRenewal = row["HasRenewal"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasRenewal"]) : false,
-                HasFresh = row["HasFresh"]?.ToString() != string.Empty ? Convert.ToBoolean(row["HasFresh"]) : false,
-                KYC = row["KYC"]?.ToString() != string.Empty ? Convert.ToBoolean(row["KYC"]) : false,
-                ShowProfile = row["ShowProfile"]?.ToString() != string.Empty ? Convert.ToBoolean(row["ShowProfile"]) : false,
-                ShowMissing = row["ShowMissing"]?.ToString() != string.Empty ? Convert.ToBoolean(row["ShowMissing"]) : false,
-                AgentSOA = row["AgentSOA"]?.ToString() != string.Empty ? Convert.ToBoolean(row["AgentSOA"]) : false,
-                RPSEnabled = row["RPSEnabled"]?.ToString() != string.Empty ? Convert.ToBoolean(row["RPSEnabled"]) : false,
-                YearMonth = row["YearMonth"]?.ToString() ?? string.Empty,
-                KYCMSG = row["KYCMSG"]?.ToString() ?? string.Empty,
-                CONVERT_DATA = row["CONVERT_DATA"]?.ToString() ?? string.Empty,
-            };
-
-            return person;
         }
     }
 }

@@ -323,7 +323,6 @@ namespace BLC
             }
             dt.Rows.Add(defaultRow);
         }
-
         public static void ConstructTask(DoOpMainParams doOpParams, string jsonPath, string taskName, ref List<DQParam> Params, ref DataSet GlobalOperatorDS)
         {
 
@@ -354,6 +353,21 @@ namespace BLC
                 }
             }
 
+        }
+
+        public static Dictionary<string, string> GetOutputParams(ref DataSet GlobalOperatorDS)
+        {
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+            foreach (DataRow row in GlobalOperatorDS.Tables["PARAMETERS"].Rows)
+            {
+                if (row["PARAM_TYPE"].ToString() == "O")
+                {
+                    parameters.Add(row["PARAM_NAME"].ToString(), row["PARAM_VALUE"].ToString());
+                }
+            }
+
+            return parameters;
         }
     }
 }
