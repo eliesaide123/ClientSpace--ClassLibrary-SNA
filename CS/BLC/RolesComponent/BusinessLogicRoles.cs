@@ -76,13 +76,7 @@ namespace BLC.RolesComponent
         {
             this.GlobalOperatorDS = new DataSet();
             var taskName = "SetRoles";
-            //List<DQParam> Params = CommonFunctions.GetTaskParams(jsonPath, taskName);
             List<DQParam> Params = new List<DQParam>();
-            //Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "Q" });
-            //Params.Add(new DQParam() { Name = "ROLEID", Value = roleId, Type="Q" });
-
-            //DataTable tbl_VARIABLES = CommonFunctions.GetTableColumns(jsonPath, taskName, "VARIABLES");
-            //CommonFunctions.DefaultRow(ref tbl_VARIABLES, ref GlobalOperatorDS);
 
             var doOpParams = new DoOpMainParams() { Credentials = new CredentialsDto() { SessionID = sessionId}, RoleID = roleId };
 
