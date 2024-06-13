@@ -8,6 +8,8 @@ using System.Data;
 using RestSharp;
 using System.Text;
 using AutoMapper;
+using System.Reflection;
+using System.Diagnostics;
 
 namespace BLC.LoginComponent
 {
@@ -24,37 +26,62 @@ namespace BLC.LoginComponent
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
             _mapper = mapper;
-            if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
-            {
-                jsonPath = ConfigurationManager.AppSettings["jsonFilePath"];
-            }
+
+            //if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
+            //{
+            //    jsonPath = ConfigurationManager.AppSettings["jsonFilePath"];
+            //}
+
+            
+            //string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            //string assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+            //string relativePath = @"DoOperationTasks.json";
+
+            //jsonPath = Path.Combine(assemblyDirectory, relativePath);
+
+            jsonPath = CommonFunctions.GetJSONFileLocation();
         }
         public async void GetSession(string sessionId)
         {
             this.GlobalOperatorDS = new DataSet();
             List<DQParam> Params = new List<DQParam>();
+
+            var taskName = "DQNewSession";
+            var doOpParams = new DoOpMainParams() { };
+
             Params.Add(new DQParam() { Name = "TASK_NAME", Value = "DQNewSession", Type = "" });
             Params.Add(new DQParam() { Name = "SessionID", Value = sessionId, Type = "" });
+           
             _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
 
         }
         public LoginUserResponse Authenticate(CredentialsDto credentials)
         {
             this.GlobalOperatorDS = new DataSet();
-            var taskName = "DQWebAuthentication";
-            
             List<DQParam> Params = new List<DQParam>();
-           
+
+            var taskName = "DQWebAuthentication";
             var doOpParams = new DoOpMainParams() { Credentials = credentials };
-            CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            //CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            if (GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            CommonFunctions.CallDoOperation(_callApi, taskName, doOpParams, jsonPath, ref Params, ref GlobalOperatorDS);
+
+            // _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+
+            //if (GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            //{
+            //    return new LoginUserResponse()
+            //    {
+            //        Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS),
+            //    };
+            //}
+
+            if (CommonFunctions.HasNotifications(GlobalOperatorDS, "NOTIFICATION"))
             {
                 return new LoginUserResponse()
                 {
-                    Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS),
+                    Errors =  CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)
                 };
             }
 

@@ -1,4 +1,7 @@
-﻿using Entities;
+﻿using BLC.Service;
+using Entities;
+using Entities.IActionResponseDTOs;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -6,13 +9,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BLC
 {
     public static class CommonFunctions
-    {
+    { 
         public static Dictionary<string, object> TransformDataToDictionary(string tblName, DataSet GlobalOperatorDS)
         {
             DataTable dataTable = GlobalOperatorDS.Tables[tblName];
@@ -325,7 +329,6 @@ namespace BLC
         }
         public static void ConstructTask(DoOpMainParams doOpParams, string jsonPath, string taskName, ref List<DQParam> Params, ref DataSet GlobalOperatorDS)
         {
-
             Params = GetTaskParams(jsonPath, taskName, doOpParams);
 
             GlobalOperatorDS = GetTables(jsonPath, taskName);
@@ -368,5 +371,34 @@ namespace BLC
 
             return parameters;
         }
+
+        public static void CallDoOperation(  ServiceCallApi _callApi, string taskName, DoOpMainParams doOpParams, string JSONpath, ref  List<DQParam> Params , ref DataSet GlobalOperatorDS) {
+          
+            ConstructTask(doOpParams, JSONpath, taskName, ref Params, ref GlobalOperatorDS);
+
+            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+        }
+
+        public static bool HasNotifications(DataSet dataSet, string tableName)
+        {
+           
+            if (dataSet.Tables.Contains(tableName) && dataSet.Tables[tableName].Rows.Count > 0)
+            {
+               
+                return true;
+            }
+
+            return false;
+        }
+
+        public static string GetJSONFileLocation()
+        {
+            string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+            string assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+            string relativePath = @"DoOperationTasks.json";
+
+            return Path.Combine(assemblyDirectory, relativePath);
+        }
+
     }
 }
