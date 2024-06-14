@@ -19,6 +19,9 @@
     <Reference Include="BLC">
       <HintPath>..\BLC\bin\Debug\net8.0\BLC.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\DQServiceLayer\bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

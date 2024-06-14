@@ -38,30 +38,25 @@ namespace DAL.LoginComponent
 
             CommonFunctions.CallDoOperation(_callApi, taskName, doOpParams, jsonPath, ref GlobalOperatorDS);
 
-            if (CommonFunctions.HasNotifications(GlobalOperatorDS, "NOTIFICATION"))
+            return CommonFunctions.HandleNotifications(GlobalOperatorDS, "NOTIFICATION", () =>
             {
+                if (credentials.IsAuthenticated == true)
+                {
+                    _sessionManager.SetSessionValue("DQ_SessionID", credentials.SessionID);
+                    _sessionManager.SetSessionValue("DQ_IsLoggedIn", "true");
+
+                    if (credentials.IsFirstLogin == false)
+                    {
+                        _sessionManager.SetSessionValue("DQCULTURE", "EN");
+                        _sessionManager.SetSessionValue("DQWEBDIR", "ltr");
+                    }
+                }
+
                 return new LoginUserResponse()
                 {
-                    Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)
+                    Credentials = _mapper.Map<DataSet, CredentialsDto>(GlobalOperatorDS)
                 };
-            }
-
-            if (credentials.IsAuthenticated == true)
-            {
-                _sessionManager.SetSessionValue("DQ_SessionID", credentials.SessionID);
-                _sessionManager.SetSessionValue("DQ_IsLoggedIn", "true");
-
-                if (credentials.IsFirstLogin == false)
-                {
-                    _sessionManager.SetSessionValue("DQCULTURE", "EN");
-                    _sessionManager.SetSessionValue("DQWEBDIR", "ltr");
-                }
-            }
-
-            return new LoginUserResponse()
-            {
-                Credentials = _mapper.Map<DataSet, CredentialsDto>(GlobalOperatorDS)
-            };
-        }
+            });
+        }        
     }
 }

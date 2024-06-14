@@ -30,66 +30,6 @@ namespace BLC.Service
         {
             try
             {
-
-                //// Serialize List<DQParam> to a dictionary
-                //var paramJson = JsonConvert.SerializeObject(Params, Newtonsoft.Json.Formatting.Indented);
-
-                //var dataSetJson = new JObject();
-
-                //// Iterate over each DataTable in the DataSet
-                //foreach (DataTable table in operatorDS.Tables)
-                //{
-                //    // Create a JObject to store table information (columns and rows)
-                //    var tableJson = new JObject();
-
-                //    // Create a JArray to store column information for the current table
-                //    var columnInfoArray = new JArray();
-
-                //    // Iterate over each DataColumn in the DataTable
-                //    foreach (DataColumn column in table.Columns)
-                //    {
-                //        // Create a JArray containing column name and data type
-                //        var columnArray = new JArray();
-                //        columnArray.Add(column.ColumnName);
-                //        columnArray.Add(column.DataType.FullName); // Getting the full name of the data type
-
-                //        // Add the column array to the column information array
-                //        columnInfoArray.Add(columnArray);
-                //    }
-
-                //    // Add the column information array to the table JObject with key "columns"
-                //    tableJson["columns"] = columnInfoArray;
-
-                //    // Create a JArray to store rows for the current table
-                //    var rowsArray = new JArray();
-
-                //    // Iterate over each DataRow in the DataTable
-                //    foreach (DataRow row in table.Rows)
-                //    {
-                //        // Create a JArray to store the current row's data
-                //        var rowArray = new JArray();
-
-                //        // Iterate over each column in the DataRow
-                //        foreach (var item in row.ItemArray)
-                //        {
-                //            rowArray.Add(item.ToString()); // Add each column value to the row array
-                //        }
-
-                //        // Add the row array to the rows array
-                //        rowsArray.Add(rowArray);
-                //    }
-
-                //    // Add the rows array to the table JObject with key "rows"
-                //    tableJson["rows"] = rowsArray;
-
-                //    // Add the table JObject to the DataSet JObject with table name as key
-                //    dataSetJson[table.TableName] = tableJson;
-                //}
-
-                //// Serialize the JObject to JSON
-                //string operatorDSJson = dataSetJson.ToString();
-
-                // Create a combined object to hold both serialized objects
                 var bodyContent = new
                 {
                     jsonPath = jsonPath,

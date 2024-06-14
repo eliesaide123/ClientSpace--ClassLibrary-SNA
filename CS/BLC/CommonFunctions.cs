@@ -372,11 +372,25 @@ namespace BLC
             return parameters;
         }
 
-        public static void CallDoOperation(  ServiceCallApi _callApi, string taskName, DoOpMainParams doOpParams, string JSONpath, ref DataSet GlobalOperatorDS) {
-          
-            //ConstructTask(doOpParams, JSONpath, taskName, ref Params, ref GlobalOperatorDS);
+        public static void CallDoOperation(  ServiceCallApi _callApi, string taskName, DoOpMainParams doOpParams, string JSONpath, ref DataSet GlobalOperatorDS) {                     
 
             _callApi.PostApiData("/api/DQ_DoOperation", taskName, JSONpath, doOpParams, ref GlobalOperatorDS);
+        }
+
+        public static T HandleNotifications<T>(DataSet dataSet, string notificationType, Func<T> successResponseFactory) where T : class, new()
+        {
+            if (CommonFunctions.HasNotifications(dataSet, notificationType))
+            {
+                var response = new T();
+                var errorsProperty = typeof(T).GetProperty("Errors");
+                if (errorsProperty != null)
+                {
+                    errorsProperty.SetValue(response, CommonFunctions.GetNotifications(notificationType, dataSet));
+                }
+                return response;
+            }
+
+            return successResponseFactory();
         }
 
         public static bool HasNotifications(DataSet dataSet, string tableName)
