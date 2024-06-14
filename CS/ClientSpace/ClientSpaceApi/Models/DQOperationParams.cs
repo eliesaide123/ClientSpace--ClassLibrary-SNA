@@ -10,7 +10,8 @@ namespace ClientSpaceApi.Models
 {
     public class DQOperationParams
     {
-        public string OperatorDS { get; set; }
-        public string Params { get; set; }
+        public string taskName { get; set; }
+        public string jsonPath { get; set; }
+        public string doOpParams { get; set; }
     }
 }

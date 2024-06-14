@@ -129,7 +129,7 @@ namespace BLC
 
             return result;
         }
-        public static List<DQParam> GetTaskParams(string jsonFilePath, string taskName,DoOpMainParams? doOpParams)
+        public static List<DQParam> GetTaskParams(string jsonFilePath, string taskName, DoOpMainParams? doOpParams)
         {
             using (StreamReader sr = new StreamReader(jsonFilePath))
             using (JsonTextReader reader = new JsonTextReader(sr))
@@ -372,11 +372,11 @@ namespace BLC
             return parameters;
         }
 
-        public static void CallDoOperation(  ServiceCallApi _callApi, string taskName, DoOpMainParams doOpParams, string JSONpath, ref  List<DQParam> Params , ref DataSet GlobalOperatorDS) {
+        public static void CallDoOperation(  ServiceCallApi _callApi, string taskName, DoOpMainParams doOpParams, string JSONpath, ref DataSet GlobalOperatorDS) {
           
-            ConstructTask(doOpParams, JSONpath, taskName, ref Params, ref GlobalOperatorDS);
+            //ConstructTask(doOpParams, JSONpath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, JSONpath, doOpParams, ref GlobalOperatorDS);
         }
 
         public static bool HasNotifications(DataSet dataSet, string tableName)

@@ -43,7 +43,7 @@ namespace BLC.RolesComponent
             var doOpParams = new DoOpMainParams() { Credentials = credentials };
             CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, doOpParams, ref GlobalOperatorDS);
 
             if (this.GlobalOperatorDS != null)
             {
@@ -82,7 +82,7 @@ namespace BLC.RolesComponent
 
             CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, doOpParams, ref GlobalOperatorDS);
         }
 
     }

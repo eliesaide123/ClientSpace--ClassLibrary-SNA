@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 
-namespace Entities
+namespace ClientSpaceApi.Models
 {
     public class DoOpMainParams
     {
@@ -13,7 +12,7 @@ namespace Entities
         public CredentialsDto Credentials { get; set; } = null;
         public string RoleID { get; set; } = null;
         public int GridSize { get; set; } = 0;
-        public string Direction { get; set; } = null;
+        public string Direction { get; set; }
         public int StartIndex { get; set; } = 0;
         public Int32 PolSerNo { get; set; } = 0;
     }

@@ -42,7 +42,7 @@ namespace BLC.ProfileComponent
 
             CommonFunctions.ConstructTask(doOpParams, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, doOpParams, ref GlobalOperatorDS);
             RemoveFirstRows();
 
             if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
@@ -61,7 +61,7 @@ namespace BLC.ProfileComponent
             
             CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, parameters, ref GlobalOperatorDS);
             RemoveFirstRowPersons();
 
             if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
@@ -98,7 +98,7 @@ namespace BLC.ProfileComponent
 
             CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, parameters, ref GlobalOperatorDS);
 
             if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
             {

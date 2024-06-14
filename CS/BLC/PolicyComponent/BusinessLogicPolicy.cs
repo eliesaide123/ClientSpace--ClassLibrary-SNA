@@ -40,7 +40,7 @@ namespace BLC.PolicyComponent
             CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
 
 
-            _callApi.PostApiData("/api/DQ_DoOperation", ref GlobalOperatorDS, Params);
+            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, parameters, ref GlobalOperatorDS);
 
             if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
             {

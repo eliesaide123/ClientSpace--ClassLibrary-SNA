@@ -27,6 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="DAL">
+      <HintPath>..\DAL\bin\Debug\net8.0\DAL.dll</HintPath>
+    </Reference>
     <Reference Include="DQBasePage">
       <HintPath>..\..\..\DQBasePage\bin\Debug\DQBasePage.dll</HintPath>
     </Reference>
