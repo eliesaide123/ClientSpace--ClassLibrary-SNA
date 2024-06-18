@@ -42,6 +42,8 @@ namespace BLC.LoginComponent
             CommonFunctions.CallDoOperation(_callApi, taskName, doOpParams, jsonPath, ref GlobalOperatorDS);
 
         }
+
+        //test
         public LoginUserResponse Authenticate(CredentialsDto credentials)
         {            
             return _DAL.Authenticate(credentials, jsonPath);            
