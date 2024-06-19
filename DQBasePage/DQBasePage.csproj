@@ -51,33 +51,102 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DQCrypto">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQCrypto.dll</HintPath>
+    <Reference Include="DQBasePage, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQBasePage.dll</HintPath>
     </Reference>
-    <Reference Include="DQLogger">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQLogger.dll</HintPath>
+    <Reference Include="DQCrypto, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQCrypto.dll</HintPath>
     </Reference>
-    <Reference Include="DQOperator">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQOperator.dll</HintPath>
+    <Reference Include="DQDataEngine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQDataEngine.dll</HintPath>
     </Reference>
-    <Reference Include="DQScreenBinder">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQScreenBinder.dll</HintPath>
+    <Reference Include="DQHtmlControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQHtmlControls.dll</HintPath>
     </Reference>
-    <Reference Include="DQServiceLayer">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQServiceLayer.dll</HintPath>
+    <Reference Include="DQLogger, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQLogger.dll</HintPath>
     </Reference>
-    <Reference Include="DQSessionManager">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQSessionManager.dll</HintPath>
+    <Reference Include="DQOperator, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQOperator.dll</HintPath>
     </Reference>
-    <Reference Include="DQTools">
-      <HintPath>..\..\DQBasePage\bin\Debug\DQTools.dll</HintPath>
+    <Reference Include="DQPlugIns, Version=1.0.0.0, Culture=neutral, PublicKeyToken=392727def8f533e5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQPlugIns.dll</HintPath>
+    </Reference>
+    <Reference Include="DQScreenBinder, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQScreenBinder.dll</HintPath>
+    </Reference>
+    <Reference Include="DQServiceLayer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQServiceLayer.dll</HintPath>
+    </Reference>
+    <Reference Include="DQSessionManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQSessionManager.dll</HintPath>
+    </Reference>
+    <Reference Include="DQSimulatorDAL, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQSimulatorDAL.dll</HintPath>
+    </Reference>
+    <Reference Include="DQTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQTools.dll</HintPath>
+    </Reference>
+    <Reference Include="DQWebControls, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQWebControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.Shared.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.Shared.v5.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.UltraWebGrid.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.UltraWebGrid.v5.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.UltraWebListbar.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.UltraWebListbar.v5.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.UltraWebNavigator.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.UltraWebNavigator.v5.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.UltraWebTab.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.UltraWebTab.v5.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.WebDataInput.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.WebDataInput.v5.1.dll</HintPath>
+    </Reference>
+    <Reference Include="Infragistics.WebUI.WebDateChooser.v5.1, Version=5.1.20051.37, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Infragistics.WebUI.WebDateChooser.v5.1.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Progress.Messages">
-      <HintPath>..\..\DQBasePage\bin\Debug\Progress.Messages.dll</HintPath>
+    <Reference Include="Progress.Messages, Version=11.7.0.1811, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Progress.Messages.dll</HintPath>
     </Reference>
-    <Reference Include="Progress.o4glrt">
-      <HintPath>..\..\DQBasePage\bin\Debug\Progress.o4glrt.dll</HintPath>
+    <Reference Include="Progress.o4glrt, Version=11.7.0.1811, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Progress.o4glrt.dll</HintPath>
+    </Reference>
+    <Reference Include="PropEdControls, Version=1.0.1.25772, Culture=neutral, PublicKeyToken=f2b75131cbfb150a">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\PropEdControls.dll</HintPath>
+    </Reference>
+    <Reference Include="Resolver, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Resolver.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -87,6 +156,10 @@
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="TaskAttribute, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\TaskAttribute.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DQAjaxedBasePage.cs">

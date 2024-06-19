@@ -63,11 +63,16 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DQDataEngine">
-      <HintPath>..\..\DQServiceLayer\bin\Debug\DQDataEngine.dll</HintPath>
+    <Reference Include="DQDataEngine, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQDataEngine.dll</HintPath>
     </Reference>
     <Reference Include="DQLogger">
       <HintPath>..\..\DQServiceLayer\bin\Debug\DQLogger.dll</HintPath>
+    </Reference>
+    <Reference Include="DQServiceLayer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DQServiceLayer.dll</HintPath>
     </Reference>
     <Reference Include="DQTools">
       <HintPath>..\..\DQServiceLayer\bin\Debug\DQTools.dll</HintPath>
