@@ -41,9 +41,9 @@ namespace BLC.RolesComponent
             {
                 var checkRolesResponse = new CheckRolesResponse();
 
-                if (this.GlobalOperatorDS.Tables["UserIdent"] != null)
+                if (GlobalOperatorDS.Tables["UserIdent"] != null)
                 {
-                    if (this.GlobalOperatorDS.Tables["UserIdent"].Rows.Count == 1)
+                    if (GlobalOperatorDS.Tables["UserIdent"].Rows.Count == 1)
                     {
                         var oUserIdent = _mapper.Map<DataSet, cUserIdent>(GlobalOperatorDS);
                         //oUserIdent.RoleID = GlobalOperatorDS.Tables["Codes"].Rows[0]["Code"].ToString().Split("-")[0];
