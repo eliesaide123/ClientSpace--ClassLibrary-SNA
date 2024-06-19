@@ -1,4 +1,5 @@
 ﻿using BLC.Service;
+using DAL.PolicyComponent;
 using Entities;
 using Entities.IActionResponseDTOs;
 using Microsoft.AspNetCore.Http;
@@ -20,42 +21,29 @@ namespace BLC.PolicyComponent
         private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
         private readonly string jsonPath;
-        public BusinessLogicPolicy(IHttpContextAccessor httpContextAccessor)
+        private readonly IPolicyDAL _DAL;
+        public BusinessLogicPolicy(IHttpContextAccessor httpContextAccessor, IPolicyDAL DAL)
         {
             _callApi = new ServiceCallApi();
             GlobalOperatorDS = new DataSet();
             _sessionManager = new SessionManager(httpContextAccessor);
-            if (ConfigurationManager.AppSettings != null && ConfigurationManager.AppSettings["jsonFilePath"] != null)
-            {
-                jsonPath = ConfigurationManager.AppSettings["jsonFilePath"];
-            }
+            _DAL = DAL;
+            jsonPath = CommonFunctions.GetJSONFileLocation();
         }
 
         public GetPolicyDetailsResponse DQ_GetPIPolicyDetails(DoOpMainParams parameters)
         {
-            this.GlobalOperatorDS = new DataSet();
-            var taskName = "GetPIPolicyDetails";
-            List<DQParam> Params = new List<DQParam>();
+            DataSet GlobalOperatorDS = _DAL.DQ_GetPIPolicyDetails(parameters, jsonPath);
 
-            CommonFunctions.ConstructTask(parameters, jsonPath, taskName, ref Params, ref GlobalOperatorDS);
-
-
-            _callApi.PostApiData("/api/DQ_DoOperation", taskName, jsonPath, parameters, ref GlobalOperatorDS);
-
-            if (this.GlobalOperatorDS.Tables["NOTIFICATION"].Rows.Count > 0)
+            return CommonFunctions.HandleNotifications<GetPolicyDetailsResponse>(GlobalOperatorDS, "NOTIFICATION", () =>
             {
-                return new GetPolicyDetailsResponse()
-                {
-                    Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS)
-                };
-            }
+                var RES_Polcom = CommonFunctions.GetListFromData<PolcomPolicyDetailsDto>("Polcom", GlobalOperatorDS);
+                var RES_Codes = CommonFunctions.GetListFromData<CodesPolicyDetailsDto>("Codes", GlobalOperatorDS);
 
-            var RES_Polcom = CommonFunctions.GetListFromData<PolcomPolicyDetailsDto>("Polcom", GlobalOperatorDS);
-            var RES_Codes = CommonFunctions.GetListFromData<CodesPolicyDetailsDto>("Codes", GlobalOperatorDS);
+                var sendResponse = new GetPolicyDetailsResponse() { Polcom = RES_Polcom, Codes = RES_Codes };
 
-            var sendResponse = new GetPolicyDetailsResponse() { Polcom = RES_Polcom, Codes = RES_Codes };
-
-            return sendResponse;
+                return sendResponse;
+            });
         }
 
     }

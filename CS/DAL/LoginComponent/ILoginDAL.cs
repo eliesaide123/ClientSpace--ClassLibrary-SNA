@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
 
 namespace DAL.LoginComponent
 {
     public interface ILoginDAL
     {
-        LoginUserResponse Authenticate(CredentialsDto credentials, string jsonPath);
+        DataSet Authenticate(CredentialsDto credentials, string jsonPath);
     }
 }

@@ -46,7 +46,26 @@ namespace BLC.LoginComponent
         //test1
         public LoginUserResponse Authenticate(CredentialsDto credentials)
         {            
-            return _DAL.Authenticate(credentials, jsonPath);            
+            DataSet GlobalOperatorDS = _DAL.Authenticate(credentials, jsonPath);
+            return CommonFunctions.HandleNotifications(GlobalOperatorDS, "NOTIFICATION", () =>
+            {
+                if (credentials.IsAuthenticated == true)
+                {
+                    _sessionManager.SetSessionValue("DQ_SessionID", credentials.SessionID);
+                    _sessionManager.SetSessionValue("DQ_IsLoggedIn", "true");
+
+                    if (credentials.IsFirstLogin == false)
+                    {
+                        _sessionManager.SetSessionValue("DQCULTURE", "EN");
+                        _sessionManager.SetSessionValue("DQWEBDIR", "ltr");
+                    }
+                }
+
+                return new LoginUserResponse()
+                {
+                    Credentials = _mapper.Map<DataSet, CredentialsDto>(GlobalOperatorDS)
+                };
+            });
         }
     }
 }

@@ -36,7 +36,32 @@ namespace BLC.RolesComponent
 
         public CheckRolesResponse DQ_CheckRoles(CredentialsDto credentials)
         {
-            return _DAL.DQ_CheckRoles(credentials, jsonPath);
+            DataSet GlobalOperatorDS = _DAL.DQ_CheckRoles(credentials, jsonPath);
+            return CommonFunctions.HandleNotifications(GlobalOperatorDS, "NOTIFICATION", () =>
+            {
+                var checkRolesResponse = new CheckRolesResponse();
+
+                if (this.GlobalOperatorDS.Tables["UserIdent"] != null)
+                {
+                    if (this.GlobalOperatorDS.Tables["UserIdent"].Rows.Count == 1)
+                    {
+                        var oUserIdent = _mapper.Map<DataSet, cUserIdent>(GlobalOperatorDS);
+                        //oUserIdent.RoleID = GlobalOperatorDS.Tables["Codes"].Rows[0]["Code"].ToString().Split("-")[0];
+
+                        _sessionManager.SetSessionValue("DQUserIdent", JsonConvert.SerializeObject(oUserIdent));
+                        checkRolesResponse.Error = false;
+                        checkRolesResponse.SUCCESS = oUserIdent;
+                        return checkRolesResponse;
+                    }
+                }
+                else
+                {
+                    checkRolesResponse.Error = true;
+                    checkRolesResponse.Errors = CommonFunctions.GetNotifications("NOTIFICATION", GlobalOperatorDS);
+                    return checkRolesResponse;
+                }
+                return new CheckRolesResponse() { Error = true };
+            });
         }
 
         public void SetRole(string sessionId, string roleId)

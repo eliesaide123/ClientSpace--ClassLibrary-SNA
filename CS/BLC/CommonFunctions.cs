@@ -371,12 +371,10 @@ namespace BLC
 
             return parameters;
         }
-
         public static void CallDoOperation(  ServiceCallApi _callApi, string taskName, DoOpMainParams doOpParams, string JSONpath, ref DataSet GlobalOperatorDS) {                     
 
             _callApi.PostApiData("/api/DQ_DoOperation", taskName, JSONpath, doOpParams, ref GlobalOperatorDS);
         }
-
         public static T HandleNotifications<T>(DataSet dataSet, string notificationType, Func<T> successResponseFactory) where T : class, new()
         {
             if (CommonFunctions.HasNotifications(dataSet, notificationType))
@@ -392,7 +390,6 @@ namespace BLC
 
             return successResponseFactory();
         }
-
         public static bool HasNotifications(DataSet dataSet, string tableName)
         {
            
@@ -404,7 +401,6 @@ namespace BLC
 
             return false;
         }
-
         public static string GetJSONFileLocation()
         {
             string assemblyLocation = Assembly.GetExecutingAssembly().Location;
@@ -413,6 +409,29 @@ namespace BLC
 
             return Path.Combine(assemblyDirectory, relativePath);
         }
-
+        public static void RemoveFirstRows(ref DataSet GlobalOperatorDS)
+        {
+            // Remove the first row of each DataTable if they exist, excluding specific tables
+            foreach (DataTable table in GlobalOperatorDS.Tables)
+            {
+                if (table.Rows.Count > 0 && table.TableName != "PARAMETERS" && table.TableName != "NOTIFICATION")
+                {
+                    table.Rows[0].Delete();
+                    table.AcceptChanges();
+                }
+            }
+        }
+        public static void RemoveFirstRowFromTblName(ref DataSet GlobalOperatorDS, string tblName)
+        {
+            // Remove the first row of each DataTable if they exist, excluding specific tables
+            foreach (DataTable table in GlobalOperatorDS.Tables)
+            {
+                if (table.Rows.Count > 0 && table.TableName == tblName)
+                {
+                    table.Rows[0].Delete();
+                    table.AcceptChanges();
+                }
+            }
+        }
     }
 }

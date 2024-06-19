@@ -19,7 +19,6 @@ namespace DAL.LoginComponent
         private DataSet GlobalOperatorDS;
         private readonly SessionManager _sessionManager;
         private readonly IMapper _mapper;
-        private readonly string jsonPath;
 
         public LoginDAL(IHttpContextAccessor httpContextAccessor, IMapper mapper)
         {
@@ -29,7 +28,7 @@ namespace DAL.LoginComponent
             _mapper = mapper;
         }
 
-        public LoginUserResponse Authenticate(CredentialsDto credentials, string jsonPath)
+        public DataSet Authenticate(CredentialsDto credentials, string jsonPath)
         {
             this.GlobalOperatorDS = new DataSet();            
 
@@ -38,25 +37,7 @@ namespace DAL.LoginComponent
 
             CommonFunctions.CallDoOperation(_callApi, taskName, doOpParams, jsonPath, ref GlobalOperatorDS);
 
-            return CommonFunctions.HandleNotifications(GlobalOperatorDS, "NOTIFICATION", () =>
-            {
-                if (credentials.IsAuthenticated == true)
-                {
-                    _sessionManager.SetSessionValue("DQ_SessionID", credentials.SessionID);
-                    _sessionManager.SetSessionValue("DQ_IsLoggedIn", "true");
-
-                    if (credentials.IsFirstLogin == false)
-                    {
-                        _sessionManager.SetSessionValue("DQCULTURE", "EN");
-                        _sessionManager.SetSessionValue("DQWEBDIR", "ltr");
-                    }
-                }
-
-                return new LoginUserResponse()
-                {
-                    Credentials = _mapper.Map<DataSet, CredentialsDto>(GlobalOperatorDS)
-                };
-            });
+           return GlobalOperatorDS;
         }        
     }
 }
