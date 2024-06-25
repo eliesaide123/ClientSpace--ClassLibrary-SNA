@@ -23,15 +23,43 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DAL\DAL.csproj" />
     <ProjectReference Include="..\Entities\Entities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="BLC">
+      <HintPath>bin\Debug\net8.0\BLC.dll</HintPath>
+    </Reference>
     <Reference Include="DAL">
       <HintPath>..\DAL\bin\Debug\net8.0\DAL.dll</HintPath>
     </Reference>
     <Reference Include="DQBasePage">
       <HintPath>..\..\..\DQBasePage\bin\Debug\DQBasePage.dll</HintPath>
+    </Reference>
+    <Reference Include="DQCrypto">
+      <HintPath>bin\Debug\net8.0\DQCrypto.dll</HintPath>
+    </Reference>
+    <Reference Include="DQLogger">
+      <HintPath>bin\Debug\net8.0\DQLogger.dll</HintPath>
+    </Reference>
+    <Reference Include="DQOperator">
+      <HintPath>bin\Debug\net8.0\DQOperator.dll</HintPath>
+    </Reference>
+    <Reference Include="DQScreenBinder">
+      <HintPath>bin\Debug\net8.0\DQScreenBinder.dll</HintPath>
+    </Reference>
+    <Reference Include="DQServiceLayer">
+      <HintPath>bin\Debug\net8.0\DQServiceLayer.dll</HintPath>
+    </Reference>
+    <Reference Include="DQSessionManager">
+      <HintPath>bin\Debug\net8.0\DQSessionManager.dll</HintPath>
+    </Reference>
+    <Reference Include="DQTools">
+      <HintPath>bin\Debug\net8.0\DQTools.dll</HintPath>
+    </Reference>
+    <Reference Include="Entities">
+      <HintPath>bin\Debug\net8.0\Entities.dll</HintPath>
     </Reference>
   </ItemGroup>
 

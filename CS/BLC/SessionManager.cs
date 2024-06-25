@@ -19,6 +19,12 @@ namespace BLC
         public void SetSessionValue(string key, string value)
         {
             byte[] byteArray = Encoding.UTF8.GetBytes(value);
+
+            if (GetSessionValue(key) != null)
+            {
+                _httpContextAccessor.HttpContext.Session.Remove(key);
+            }
+
             _httpContextAccessor.HttpContext.Session.Set(key, byteArray);
         }
         public string GetSessionValue(string key)
