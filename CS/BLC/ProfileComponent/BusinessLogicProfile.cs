@@ -79,10 +79,12 @@ namespace BLC.ProfileComponent
             return CommonFunctions.HandleNotifications<GetPortfolioResponse>(GlobalOperatorDS, "NOTIFICATION", () =>
             {
                 var formattedData = CommonFunctions.GetListFromData<PolcomPortfolioDto>("Polcom", GlobalOperatorDS);
+                var paramsOutput = CommonFunctions.GetOutputParams(ref GlobalOperatorDS);
 
                 var sendData = new GetPortfolioResponse()
                 {
                     Polcom = formattedData,
+                    Page_Direction = paramsOutput["PAGING_DIRECTION"].ToString()
                 };
 
                 return sendData;

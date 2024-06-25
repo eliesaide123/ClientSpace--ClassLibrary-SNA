@@ -9,5 +9,6 @@ namespace Entities.IActionResponseDTOs
     public class GetPortfolioResponse : BaseResultDto
     {
         public List<PolcomPortfolioDto>? Polcom { get;set; }
+        public string? Page_Direction { get; set; }
     }
 }
