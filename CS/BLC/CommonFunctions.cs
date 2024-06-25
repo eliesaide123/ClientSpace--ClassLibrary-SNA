@@ -115,6 +115,22 @@ namespace BLC
                                     value = Convert.ChangeType(value, propertyType);
                                 }
                                 break;
+                            case Type t when t == typeof(DateTime):
+                                if (value is string)
+                                {
+                                    DateTime dateTimeValue;
+                                   
+                                    if (DateTime.TryParse((string)value, out dateTimeValue))
+                                    {
+                                        value = dateTimeValue;
+                                    }
+                                }
+                                else
+                                {
+                                    value = Convert.ChangeType(value, propertyType);
+                                    
+                                }
+                                break;
                             default:
                                 value = Convert.ChangeType(value, propertyType);
                                 break;

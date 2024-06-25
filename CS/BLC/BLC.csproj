@@ -58,9 +58,6 @@
     <Reference Include="DQTools">
       <HintPath>bin\Debug\net8.0\DQTools.dll</HintPath>
     </Reference>
-    <Reference Include="Entities">
-      <HintPath>bin\Debug\net8.0\Entities.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
