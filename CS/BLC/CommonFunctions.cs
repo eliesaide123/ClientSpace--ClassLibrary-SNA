@@ -119,9 +119,11 @@ namespace BLC
                             case Type t when t == typeof(DateTime):
                                 if (value is string)
                                 {
-                                    DateTime dateTimeValue;
-                                   
-                                    if (DateTime.TryParse((string)value, out dateTimeValue))
+                                    if (value.ToString() == "")
+                                    {
+                                        value = null;
+                                    }
+                                    if (DateTime.TryParse((string)value, out var dateTimeValue))
                                     {
                                         value = dateTimeValue;
                                     }
@@ -129,7 +131,6 @@ namespace BLC
                                 else
                                 {
                                     value = Convert.ChangeType(value, propertyType);
-                                    
                                 }
                                 break;
                             default:
