@@ -57,6 +57,7 @@ namespace BLC
 
             return result;
         }
+        //
         public static List<T> GetListFromData<T>(string tblName, DataSet GlobalOperatorDS)
         {
             var result = new List<T>();
